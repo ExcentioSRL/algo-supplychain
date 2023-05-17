@@ -34,6 +34,9 @@ router.get('/login',async (req,res) => {
 router.post('/register', async (req, res) => {
     try{
         const {email, password, nomeAzienda, partitaIVA} = req.body;
+        if(email === undefined || password === undefined || nomeAzienda === undefined || partitaIVA === undefined){
+            return res.status(400).send("Some parts of data are missing");
+        }
         const user = await User.findOne({email,password});
         if(user !== null){
             return res.status(400).send("User already exist, use another email");
@@ -46,13 +49,23 @@ router.post('/register', async (req, res) => {
         return res.status(500).send("Internal Server Error");
     }
 });
-/*
+
 
 router.put('/changePassword',async (req,res) => {
-    const {email, password, newPassword} = req.body;
+    const {email,password,newPassword} = req.body;
     try{
+        if(email === undefined || password === undefined || newPassword === undefined){
+            return res.status(400).send("Some parts of data are missing");
+        }
         const result = await User.findOne({email,password});
-
+        if(result === null){
+            return res.status(404).send("User not found");
+        }else{
+            result.password = newPassword;
+            await User.updateOne({email,password},
+                {password: newPassword});
+            return res.status(200).send("password changed correctly");
+        }
     }catch(error){
         return res.status(500).send("Internal Server Error");
     }
@@ -63,6 +76,6 @@ router.put('/changePassword',async (req,res) => {
 router.delete('/removeUser',async (req,res) => {
 
 })
- */
+
 
 export default router;
