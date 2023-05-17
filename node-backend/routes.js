@@ -74,7 +74,21 @@ router.put('/changePassword',async (req,res) => {
 //aggiungere cambio nomeAzienda e partitaIVA?
 
 router.delete('/removeUser',async (req,res) => {
-
+    const {email,password} = req.query;
+    try{
+        if(email === undefined || password === undefined){
+            return res.status(400).send("Some parts of data are missing");
+        }
+        const result = await User.findOne({email,password});
+        if(result === null){
+            return res.status(404).send("User not found");
+        }else{
+            await User.deleteOne({email,password});
+            return res.status(200).send("User deleted correctly");
+        }
+    }catch (error){
+        return res.status(500).send("Internal Server Error");
+    }
 })
 
 
