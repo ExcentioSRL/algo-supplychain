@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema({
     nomeAzienda: String,
     partitaIVA: String,
 })
-
 export const User = mongoose.model('User',userSchema)
 export const connectDB = async () => {
     try{
