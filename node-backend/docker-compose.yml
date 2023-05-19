@@ -6,23 +6,24 @@ services:
     restart: always
     volumes:
       - mongo_db:/data/db
-    #ports:
-      #- "2717:27017"
+    ports:
+      - "27017:27017"
     networks:
       - backend
 
   api:
     container_name: api
-    build: .
     ports:
       - "3000:3000"
-    environment:
-      PORT: 3000
-      MONGODB_URI: mongodb://mongo_db:27017
+    env_file:
+      - .env
     depends_on:
       - mongo_db
     networks:
       - backend
+    build:
+      context: .
+      dockerfile: Dockerfile
 
 networks:
   backend:

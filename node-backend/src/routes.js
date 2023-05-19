@@ -1,21 +1,11 @@
-import express from "express";
-import {User} from "./database.js"
+const express = require('express')
+const {User} = require('./database')
 const router = express.Router();
-
-router.use(function (req,res,next){
-    res.header("Access-Control-Allow-Origin","*");
-    res.header("Access-Control-Allow-Methods","GET,HEAD,OPTION,POST,PUT,DELETE");
-    res.header("Access-Control-Allow-Headers","auth-token, Origin, X-Requested-With, Content-Type, Accept");
-    next();
-})
-
 
 const authenticate = (req, res, next) => {
     if (req.session.userId) {
-        // L'utente è autenticato
         next();
     } else {
-        // L'utente non è autenticato
         res.status(401).json({ error: 'User isn\'t authenticated' });
     }
 };
@@ -24,7 +14,7 @@ router.get('/login',async (req,res) => {
     const {email,password} = req.query;
     if(email === undefined || password === undefined){
         res.status(400);
-        return res.send("Missing credentials");
+        return res.json({error:"Missing credentials"});
     }
     try{
         const result = await User.findOne({email,password});
@@ -45,7 +35,7 @@ router.post('/register', async (req, res) => {
     try{
         const {email, password, nomeAzienda, partitaIVA} = req.body;
         if(email === undefined || password === undefined || nomeAzienda === undefined || partitaIVA === undefined){
-            return res.status(400).send("Some parts of data are missing");
+            return res.status(400).json({error: "Some parts of data are missing"});
         }
         const user = await User.findOne({email,password});
         if(user !== null){
@@ -60,7 +50,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-
 router.put('/changePassword',authenticate,async (req,res) => {
     const {email,password,newPassword} = req.body;
     try{
@@ -74,7 +63,7 @@ router.put('/changePassword',authenticate,async (req,res) => {
             result.password = newPassword;
             await User.updateOne({email,password},
                 {password: newPassword});
-            return res.status(200).json({result: "password changed correctly"});
+            return res.status(200).json({result: "Password changed correctly"});
         }
     }catch(error){
         return res.status(500).json({error: "Internal Server Error"});
@@ -102,4 +91,4 @@ router.delete('/removeUser',authenticate,async (req,res) => {
 })
 
 
-export default router;
+module.exports = {router};
