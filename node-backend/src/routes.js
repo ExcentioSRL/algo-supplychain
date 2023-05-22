@@ -27,9 +27,47 @@ router.get('/login',async (req,res) => {
         }
     }catch (error){
         res.status(500);
-        return res.send({error: "Internal Server Error"});
+        return res.json({error: "Internal Server Error"});
     }
-})
+});
+
+router.get('/nomeAziendaByPartitaIVA',authenticate,async (req,res) => {
+    try{
+        const {partitaIVA} = req.query;
+        if(partitaIVA === undefined){
+            return res.status(400).json({error:"Missing partitaIVA"});
+        }
+        const result = await User.findOne({partitaIVA});
+        if(result == null){
+            res.status(404);
+            return res.json({result: "Given partitaIVA doesn't match an existing user"});
+        }else{
+            return res.json(result);
+        }
+    }catch(error){
+        res.status(500);
+        return res.json({error: "Internal Server Error"});
+    }
+});
+
+router.get('/partitaIVAByEmail',authenticate,async (req,res) =>{
+    try{
+        const {email} = req.query;
+        if(email === undefined){
+            return res.status(400).json({error: "Missing email"});
+        }
+        const result = await User.findOne({email});
+        if(result == null){
+            res.status(404);
+            return res.json({result: "Given email doesn't match an existing user"});
+        }else{
+            return res.json(result);
+        }
+    }catch(error){
+        res.status(500);
+        return res.json({error: "Internal Server Error"});
+    }
+});
 
 router.post('/register', async (req, res) => {
     try{
@@ -69,8 +107,6 @@ router.put('/changePassword',authenticate,async (req,res) => {
         return res.status(500).json({error: "Internal Server Error"});
     }
 })
-
-//aggiungere cambio nomeAzienda e partitaIVA?
 
 router.delete('/removeUser',authenticate,async (req,res) => {
     const {email,password} = req.query;
