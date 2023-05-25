@@ -15,7 +15,7 @@ const PORT = process.env.PORT;
 const app = express();
 
 app.use(session({
-    secret: "fh7yn9a", //random?
+    secret: "fh7yn9a", //testa Math.random()
     resave: false,
     saveUninitialized: false,
     store: store,
