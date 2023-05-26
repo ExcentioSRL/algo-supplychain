@@ -7,49 +7,56 @@ import pyteal as pt
 class Stock(pt.abi.NamedTuple):
     #id: pt.abi.Field[pt.abi.String]
     creator: pt.abi.Field[pt.abi.String]
-    owner: pt.abi.Field[pt.abi.Address] #forse String?
+    owner: pt.abi.Field[pt.abi.String] #forse String?
 
-#devi usare boxmapping
-class MappingStock:
-    stocks= BoxMapping(pt.abi.Address,Stock)
+#devi usare boxmapping    
+class app(bk.Application):
 
-app = bk.Application("StockRegistration",state=MappingStock)
+    stocks= BoxMapping(pt.abi.String,Stock)
 
-@app.internal
-def check_ownership(id: pt.abi.String) ->pt.Expr:
-    return pt.Seq(
-        app.state.stocks[id.get()].get()
-    )
+    @bk.internal
+    def check_ownership(self,id: pt.abi.String,owner: pt.abi.String) ->pt.Expr:
+        return pt.Seq(
+            pt.Assert(self.stocks[id.get()] == owner.get())
+        )
 
-@app.internal
-def check_existence(id: pt.abi.String) ->pt.Expr:
-    return 
+    @bk.external
+    def add_stock(self,payment:pt.abi.PaymentTransaction ,id: pt.abi.String,creator: pt.abi.String, owner: pt.abi.String,*,output: Stock) -> pt.Expr:
+        return pt.Seq(
+            #controllo che riceva i fondi per creare il lotto
+            pt.Assert(payment.get().receiver() == self.address),
+            #controllo che quanto ho ricevuto sia abbastanza da soddisfare il Minimum Balance Requirement
+            pt.Assert(payment.get().amount >= pt.Int(1)), #cambiare Int(1)
+            #controllo che il lotto ancora non esista
+            pt.Assert(pt.Not(self.stocks[id.get()].exists())),
 
-@app.external
-def add_stock(payment:pt.abi.PaymentTransaction ,id: pt.abi.String,creator: pt.abi.String, owner: pt.abi.String,*,output: Stock) -> pt.Expr:
-    return pt.Seq(
-        
-        #deve ricevere fondi
-        #aggiungere il check sull'esistenza
-        output.set(creator.get(),owner.get()), #Non so se serve il .get()
-        pt.App.box_put(id.get(),output.encode()),
-    )
+            #crea un box
+            output.set(creator.get(),owner.get()),
+            pt.App.box_put(id.get(),output.encode()),
+        )
 
-@app.external
-def update_owner(id:pt.abi.String,owner:pt.abi.String) -> pt.Expr:
-    return pt.Seq(
-        #aggiungere il check sull'ownership
-        # 
-        pt.App.box_replace(pt.Txn.sender(),)
-        
-    )
+    @bk.external
+    def update_owner(self,id:pt.abi.String,owner:pt.abi.String) -> pt.Expr:
+        return pt.Seq(
+            self.check_ownership(id=id,owner=owner), #Assert?
+            #aggiungere il check sull'ownership
+            # 
+            pt.App.box_replace(id.get(),)
+            
+        )
 
+    @bk.external
+    def get_stocks_by_owner(owner: pt.abi.String) -> pt.Expr:
+        return pt.Seq(
+            #Indexer?
+        )
 
 #TO DO:
 # - Quando crei un nuovo lotto, chiedi di inviare un balance per scrivere ->
-#  - Prima invio una transazione di pagamento
-#  - Poi invio la  mia effettiva transazione di Write
-#  - Si potrebbe usare Atomic Transaction ?
+#  1 Prima invio una transazione di pagamento 
+#  2 Poi invio la  mia effettiva transazione di Write
+#  1+2 Si potrebbe usare Atomic Transaction ?
+# - Costo della creazione?
 # - Controllo sull'esistenza di un lotto tra tutti i lotti esistenti ? 
 # - Controllo sull'ownership di un lotto
 # - Create/Deploy
