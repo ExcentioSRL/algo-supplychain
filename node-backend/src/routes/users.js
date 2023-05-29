@@ -1,14 +1,6 @@
-const express = require('express')
-const {User} = require('./database')
-const router = express.Router();
-
-const authenticate = (req, res, next) => {
-    if (req.session.userId) {
-        next();
-    } else {
-        res.status(401).json({ error: 'User isn\'t authenticated' });
-    }
-};
+const router = require('express').Router();
+const {User} = require('../database.js');
+const {authenticate} = require('../auth.js');
 
 router.get('/login',async (req,res) => {
     const {email,password} = req.query;
@@ -126,5 +118,4 @@ router.delete('/removeUser',authenticate,async (req,res) => {
     }
 })
 
-
-module.exports = {router};
+module.exports = router;

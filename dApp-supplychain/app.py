@@ -17,7 +17,7 @@ class app(bk.Application):
     @bk.internal
     def check_ownership(self,id: pt.abi.String,owner: pt.abi.String) ->pt.Expr:
         return pt.Seq(
-            pt.Assert(self.stocks[id.get()] == owner.get())
+            pt.Assert(self.stocks[id.get()].get() == owner.get())
         )
 
     @bk.external
@@ -43,12 +43,6 @@ class app(bk.Application):
             # 
             pt.App.box_replace(id.get(),)
             
-        )
-
-    @bk.external
-    def get_stocks_by_owner(owner: pt.abi.String) -> pt.Expr:
-        return pt.Seq(
-            #Indexer?
         )
 
 #TO DO:
