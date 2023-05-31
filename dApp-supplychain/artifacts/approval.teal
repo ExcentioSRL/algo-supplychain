@@ -1,0 +1,278 @@
+#pragma version 8
+intcblock 0 1 65536 2
+bytecblock 0x
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l10
+txna ApplicationArgs 0
+pushbytes 0xf4b914bd // "get_fee(uint64)void"
+==
+bnz main_l9
+txna ApplicationArgs 0
+pushbytes 0x5f80f4d9 // "get_balance_req(uint64)void"
+==
+bnz main_l8
+txna ApplicationArgs 0
+pushbytes 0xa7e8fd98 // "add_stock(pay,string,string,string)void"
+==
+bnz main_l7
+txna ApplicationArgs 0
+pushbytes 0x87e7285b // "getStock(string)void"
+==
+bnz main_l6
+err
+main_l6:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+callsub getStock_3
+intc_1 // 1
+return
+main_l7:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+store 1
+txna ApplicationArgs 2
+store 2
+txna ApplicationArgs 3
+store 3
+txn GroupIndex
+intc_1 // 1
+-
+store 0
+load 0
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
+load 0
+load 1
+load 2
+load 3
+callsub addstock_2
+intc_1 // 1
+return
+main_l8:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+callsub getbalancereq_1
+intc_1 // 1
+return
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+callsub getfee_0
+intc_1 // 1
+return
+main_l10:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l12
+err
+main_l12:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+intc_1 // 1
+return
+
+// get_fee
+getfee_0:
+proto 1 0
+pushbytes 0x6d696e74466565 // "mintFee"
+app_global_get
+frame_bury -1
+retsub
+
+// get_balance_req
+getbalancereq_1:
+proto 1 0
+pushbytes 0x6d696e696d756d42616c616e6365526571756972656d656e74 // "minimumBalanceRequirement"
+app_global_get
+frame_bury -1
+retsub
+
+// add_stock
+addstock_2:
+proto 4 0
+bytec_0 // ""
+intc_0 // 0
+dup
+bytec_0 // ""
+dupn 8
+intc_0 // 0
+dup
+bytec_0 // ""
+dup
+frame_dig -4
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -4
+gtxns Sender
+box_len
+store 5
+store 4
+load 5
+assert
+frame_dig -3
+frame_bury 4
+frame_dig 4
+frame_bury 3
+pushint 6 // 6
+frame_bury 1
+frame_dig 1
+frame_dig 4
+len
++
+frame_bury 2
+frame_dig 2
+intc_2 // 65536
+<
+assert
+frame_dig 1
+itob
+extract 6 0
+frame_dig -2
+frame_bury 4
+frame_dig 3
+frame_dig 4
+concat
+frame_bury 3
+frame_dig 2
+frame_bury 1
+frame_dig 1
+frame_dig 4
+len
++
+frame_bury 2
+frame_dig 2
+intc_2 // 65536
+<
+assert
+frame_dig 1
+itob
+extract 6 0
+concat
+frame_dig -1
+frame_bury 4
+frame_dig 3
+frame_dig 4
+concat
+frame_bury 3
+frame_dig 2
+frame_bury 1
+frame_dig 1
+itob
+extract 6 0
+concat
+frame_dig 3
+concat
+frame_bury 0
+frame_dig -4
+gtxns Sender
+box_get
+store 7
+store 6
+load 7
+assert
+load 6
+frame_bury 6
+frame_dig 6
+frame_dig 6
+intc_0 // 0
+extract_uint16
+frame_dig 6
+intc_3 // 2
+extract_uint16
+substring3
+frame_bury 7
+frame_dig 6
+frame_dig 6
+intc_3 // 2
+extract_uint16
+dig 1
+len
+substring3
+frame_bury 9
+frame_dig 7
+frame_bury 15
+frame_dig 15
+frame_bury 14
+pushint 4 // 4
+frame_bury 12
+frame_dig 12
+frame_dig 15
+len
++
+frame_bury 13
+frame_dig 13
+intc_2 // 65536
+<
+assert
+frame_dig 12
+itob
+extract 6 0
+frame_dig 9
+frame_bury 15
+frame_dig 14
+frame_dig 15
+concat
+frame_bury 14
+frame_dig 13
+frame_bury 12
+frame_dig 12
+itob
+extract 6 0
+concat
+frame_dig 14
+concat
+frame_bury 11
+frame_dig -4
+gtxns Sender
+frame_dig 11
+box_put
+retsub
+
+// getStock
+getStock_3:
+proto 1 0
+frame_dig -1
+extract 2 0
+box_get
+store 9
+store 8
+retsub

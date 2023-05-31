@@ -1,0 +1,118 @@
+{
+    "hints": {
+        "get_fee(uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "get_balance_req(uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "add_stock(pay,string,string,string)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "getStock(string)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        }
+    },
+    "source": {
+        "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMSA2NTUzNiAyCmJ5dGVjYmxvY2sgMHgKdHhuIE51bUFwcEFyZ3MKaW50Y18wIC8vIDAKPT0KYm56IG1haW5fbDEwCnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4ZjRiOTE0YmQgLy8gImdldF9mZWUodWludDY0KXZvaWQiCj09CmJueiBtYWluX2w5CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4NWY4MGY0ZDkgLy8gImdldF9iYWxhbmNlX3JlcSh1aW50NjQpdm9pZCIKPT0KYm56IG1haW5fbDgKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhhN2U4ZmQ5OCAvLyAiYWRkX3N0b2NrKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyl2b2lkIgo9PQpibnogbWFpbl9sNwp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDg3ZTcyODViIC8vICJnZXRTdG9jayhzdHJpbmcpdm9pZCIKPT0KYm56IG1haW5fbDYKZXJyCm1haW5fbDY6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CnR4bmEgQXBwbGljYXRpb25BcmdzIDEKY2FsbHN1YiBnZXRTdG9ja18zCmludGNfMSAvLyAxCnJldHVybgptYWluX2w3Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCnN0b3JlIDEKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgpzdG9yZSAyCnR4bmEgQXBwbGljYXRpb25BcmdzIDMKc3RvcmUgMwp0eG4gR3JvdXBJbmRleAppbnRjXzEgLy8gMQotCnN0b3JlIDAKbG9hZCAwCmd0eG5zIFR5cGVFbnVtCmludGNfMSAvLyBwYXkKPT0KYXNzZXJ0CmxvYWQgMApsb2FkIDEKbG9hZCAyCmxvYWQgMwpjYWxsc3ViIGFkZHN0b2NrXzIKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDg6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CnR4bmEgQXBwbGljYXRpb25BcmdzIDEKYnRvaQpjYWxsc3ViIGdldGJhbGFuY2VyZXFfMQppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sOToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmNhbGxzdWIgZ2V0ZmVlXzAKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEwOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CmJueiBtYWluX2wxMgplcnIKbWFpbl9sMTI6CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCj09CmFzc2VydAppbnRjXzEgLy8gMQpyZXR1cm4KCi8vIGdldF9mZWUKZ2V0ZmVlXzA6CnByb3RvIDEgMApwdXNoYnl0ZXMgMHg2ZDY5NmU3NDQ2NjU2NSAvLyAibWludEZlZSIKYXBwX2dsb2JhbF9nZXQKZnJhbWVfYnVyeSAtMQpyZXRzdWIKCi8vIGdldF9iYWxhbmNlX3JlcQpnZXRiYWxhbmNlcmVxXzE6CnByb3RvIDEgMApwdXNoYnl0ZXMgMHg2ZDY5NmU2OTZkNzU2ZDQyNjE2YzYxNmU2MzY1NTI2NTcxNzU2OTcyNjU2ZDY1NmU3NCAvLyAibWluaW11bUJhbGFuY2VSZXF1aXJlbWVudCIKYXBwX2dsb2JhbF9nZXQKZnJhbWVfYnVyeSAtMQpyZXRzdWIKCi8vIGFkZF9zdG9jawphZGRzdG9ja18yOgpwcm90byA0IDAKYnl0ZWNfMCAvLyAiIgppbnRjXzAgLy8gMApkdXAKYnl0ZWNfMCAvLyAiIgpkdXBuIDgKaW50Y18wIC8vIDAKZHVwCmJ5dGVjXzAgLy8gIiIKZHVwCmZyYW1lX2RpZyAtNApndHhucyBSZWNlaXZlcgpnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwo9PQphc3NlcnQKZnJhbWVfZGlnIC00Cmd0eG5zIFNlbmRlcgpib3hfbGVuCnN0b3JlIDUKc3RvcmUgNApsb2FkIDUKYXNzZXJ0CmZyYW1lX2RpZyAtMwpmcmFtZV9idXJ5IDQKZnJhbWVfZGlnIDQKZnJhbWVfYnVyeSAzCnB1c2hpbnQgNiAvLyA2CmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpmcmFtZV9kaWcgNApsZW4KKwpmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIDIKaW50Y18yIC8vIDY1NTM2CjwKYXNzZXJ0CmZyYW1lX2RpZyAxCml0b2IKZXh0cmFjdCA2IDAKZnJhbWVfZGlnIC0yCmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMwpmcmFtZV9kaWcgNApjb25jYXQKZnJhbWVfYnVyeSAzCmZyYW1lX2RpZyAyCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpmcmFtZV9kaWcgNApsZW4KKwpmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIDIKaW50Y18yIC8vIDY1NTM2CjwKYXNzZXJ0CmZyYW1lX2RpZyAxCml0b2IKZXh0cmFjdCA2IDAKY29uY2F0CmZyYW1lX2RpZyAtMQpmcmFtZV9idXJ5IDQKZnJhbWVfZGlnIDMKZnJhbWVfZGlnIDQKY29uY2F0CmZyYW1lX2J1cnkgMwpmcmFtZV9kaWcgMgpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDEKaXRvYgpleHRyYWN0IDYgMApjb25jYXQKZnJhbWVfZGlnIDMKY29uY2F0CmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgLTQKZ3R4bnMgU2VuZGVyCmJveF9nZXQKc3RvcmUgNwpzdG9yZSA2CmxvYWQgNwphc3NlcnQKbG9hZCA2CmZyYW1lX2J1cnkgNgpmcmFtZV9kaWcgNgpmcmFtZV9kaWcgNgppbnRjXzAgLy8gMApleHRyYWN0X3VpbnQxNgpmcmFtZV9kaWcgNgppbnRjXzMgLy8gMgpleHRyYWN0X3VpbnQxNgpzdWJzdHJpbmczCmZyYW1lX2J1cnkgNwpmcmFtZV9kaWcgNgpmcmFtZV9kaWcgNgppbnRjXzMgLy8gMgpleHRyYWN0X3VpbnQxNgpkaWcgMQpsZW4Kc3Vic3RyaW5nMwpmcmFtZV9idXJ5IDkKZnJhbWVfZGlnIDcKZnJhbWVfYnVyeSAxNQpmcmFtZV9kaWcgMTUKZnJhbWVfYnVyeSAxNApwdXNoaW50IDQgLy8gNApmcmFtZV9idXJ5IDEyCmZyYW1lX2RpZyAxMgpmcmFtZV9kaWcgMTUKbGVuCisKZnJhbWVfYnVyeSAxMwpmcmFtZV9kaWcgMTMKaW50Y18yIC8vIDY1NTM2CjwKYXNzZXJ0CmZyYW1lX2RpZyAxMgppdG9iCmV4dHJhY3QgNiAwCmZyYW1lX2RpZyA5CmZyYW1lX2J1cnkgMTUKZnJhbWVfZGlnIDE0CmZyYW1lX2RpZyAxNQpjb25jYXQKZnJhbWVfYnVyeSAxNApmcmFtZV9kaWcgMTMKZnJhbWVfYnVyeSAxMgpmcmFtZV9kaWcgMTIKaXRvYgpleHRyYWN0IDYgMApjb25jYXQKZnJhbWVfZGlnIDE0CmNvbmNhdApmcmFtZV9idXJ5IDExCmZyYW1lX2RpZyAtNApndHhucyBTZW5kZXIKZnJhbWVfZGlnIDExCmJveF9wdXQKcmV0c3ViCgovLyBnZXRTdG9jawpnZXRTdG9ja18zOgpwcm90byAxIDAKZnJhbWVfZGlnIC0xCmV4dHJhY3QgMiAwCmJveF9nZXQKc3RvcmUgOQpzdG9yZSA4CnJldHN1Yg==",
+        "clear": "I3ByYWdtYSB2ZXJzaW9uIDgKcHVzaGludCAwIC8vIDAKcmV0dXJu"
+    },
+    "state": {
+        "global": {
+            "num_byte_slices": 0,
+            "num_uints": 2
+        },
+        "local": {
+            "num_byte_slices": 0,
+            "num_uints": 0
+        }
+    },
+    "schema": {
+        "global": {
+            "declared": {
+                "minimumBalanceRequirement": {
+                    "type": "uint64",
+                    "key": "minimumBalanceRequirement",
+                    "descr": "The price to have all those boxes"
+                },
+                "mintFee": {
+                    "type": "uint64",
+                    "key": "mintFee",
+                    "descr": "Price to create a stock"
+                }
+            },
+            "reserved": {}
+        },
+        "local": {
+            "declared": {},
+            "reserved": {}
+        }
+    },
+    "contract": {
+        "name": "stocksApp",
+        "methods": [
+            {
+                "name": "get_fee",
+                "args": [],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "get_balance_req",
+                "args": [],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "add_stock",
+                "args": [
+                    {
+                        "type": "pay",
+                        "name": "payment"
+                    },
+                    {
+                        "type": "string",
+                        "name": "id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "creator"
+                    },
+                    {
+                        "type": "string",
+                        "name": "owner"
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "getStock",
+                "args": [
+                    {
+                        "type": "string",
+                        "name": "id"
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                }
+            }
+        ],
+        "networks": {}
+    },
+    "bare_call_config": {
+        "no_op": "CREATE"
+    }
+}
