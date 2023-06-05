@@ -20,8 +20,8 @@ def add_stock(uuid: abi.String, creator: abi.String,owner: abi.String, *, output
     return Seq(
         Assert(app.state.stocks[uuid].exists()),
         (new_stock := Stock()).set(owner,creator),
-        App.box_put(uuid.get(),new_stock.encode()),  #(uuid,new_stock.encode()),
-        #app.state.stocks[uuid].set(new_stock.encode()),
+        #BoxPut(uuid.get(),new_stock.encode()), 
+        app.state.stocks[uuid].set(new_stock.encode()),
         output.decode(new_stock.encode())
     )
 

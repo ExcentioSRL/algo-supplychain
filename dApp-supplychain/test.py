@@ -13,16 +13,20 @@ def main() -> None:
 
     # Create an Application client containing both an algod client and my app
     app_client = client.ApplicationClient(
-        localnet.get_algod_client(), app.app, signer=acct.signer,app_id=21
+        localnet.get_algod_client(), app.app, signer=acct.signer,app_id=25
     )
 
     # Since we're using local state, opt in
-    app_client.opt_in()
+    #app_client.opt_in()
 
     # Passing in a dict as an argument that should take a tuple
     # according to the type spec
     stock_number = "4a"
-    app_client.call(app.add_stock, uuid=stock_number,creator="Matteo",owner="Matteo")
+    app_client.call(
+        app.add_stock, 
+        uuid=stock_number,creator="Matteo",owner="Matteo",
+        boxes=[(app_client.app_id,stock_number)]
+        )
 
     print(
         "Added"
