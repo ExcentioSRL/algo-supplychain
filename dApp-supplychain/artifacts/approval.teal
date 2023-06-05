@@ -106,6 +106,12 @@ intc_0 // 0
 dup
 bytec_0 // ""
 dup
+frame_dig -3
+box_len
+store 1
+store 0
+load 1
+assert
 frame_dig -1
 frame_bury 5
 frame_dig 5
@@ -139,10 +145,10 @@ concat
 frame_dig 4
 concat
 frame_bury 1
-txn Sender
 frame_dig -3
+extract 2 0
 frame_dig 1
-app_local_put
+box_put
 frame_dig 1
 frame_bury 0
 retsub
@@ -151,9 +157,13 @@ retsub
 getstockbyuuid_2:
 proto 1 1
 bytec_0 // ""
-txn Sender
 frame_dig -1
-app_local_get
+box_get
+store 3
+store 2
+load 3
+assert
+load 2
 frame_bury 0
 retsub
 
@@ -166,17 +176,19 @@ intc_0 // 0
 dup
 bytec_0 // ""
 dup
-txn Sender
-intc_0 // 0
 frame_dig -2
-app_local_get_ex
-store 1
-store 0
-load 1
+box_len
+store 5
+store 4
+load 5
 assert
-txn Sender
 frame_dig -2
-app_local_get
+box_get
+store 7
+store 6
+load 7
+assert
+load 6
 frame_bury 0
 frame_dig 0
 frame_dig 0
@@ -230,10 +242,12 @@ concat
 frame_dig 5
 concat
 frame_bury 0
-txn Sender
+frame_dig -2
+box_del
+pop
 frame_dig -2
 frame_dig 0
-app_local_put
+box_put
 retsub
 
 // delete

@@ -1,5 +1,4 @@
 from beaker import *
-from beaker.lib.storage import (BoxMapping)
 from pyteal import *
 
 class Stock(abi.NamedTuple):
@@ -8,8 +7,11 @@ class Stock(abi.NamedTuple):
     creator: abi.Field[abi.String]
 
 class State:
-    def __init__(self) -> None:
-        self.stocks = BoxMapping(abi.String,abi.DynamicBytes)
+    stocks = ReservedLocalStateValue(
+        stack_type= TealType.bytes,
+        max_keys=16,
+        prefix=""
+    )
 
 
 app = (Application("StockDapp", state=State())).apply(unconditional_opt_in_approval, initialize_local_state=True)
@@ -18,10 +20,8 @@ app = (Application("StockDapp", state=State())).apply(unconditional_opt_in_appro
 @app.external
 def add_stock(uuid: abi.String, creator: abi.String,owner: abi.String, *, output: Stock) -> Expr:
     return Seq(
-        Assert(app.state.stocks[uuid].exists()),
         (new_stock := Stock()).set(owner,creator),
-        App.box_put(uuid.get(),new_stock.encode()),  #(uuid,new_stock.encode()),
-        #app.state.stocks[uuid].set(new_stock.encode()),
+        app.state.stocks[uuid].set(new_stock.encode()),
         output.decode(new_stock.encode())
     )
 
@@ -33,13 +33,13 @@ def delete_stock(uuid: abi.String) -> Expr:
 
 @app.external
 def get_stock_by_uuid(uuid:abi.String, *, output: Stock) -> Expr:
-    return output.decode(app.state.stocks[uuid].get())
+    return output.decode(app.state.stocks[uuid])
 
 @app.external
 def change_owner(uuid: abi.String,new_owner:abi.String) -> Expr:
     return Seq(
         Assert(app.state.stocks[uuid].exists()),
-        (stock := Stock()).decode(app.state.stocks[uuid].get()),
+        (stock := Stock()).decode(app.state.stocks[uuid]),
         (creator := abi.String()).set(stock.creator),
         (owner := abi.String()).set(stock.owner),
         owner.set(new_owner),
