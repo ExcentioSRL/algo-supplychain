@@ -1,64 +1,55 @@
-import beaker as bk
-from beaker.lib.storage import (BoxMapping)
-import pyteal as pt
-import typing as ty
+from beaker import *
+from pyteal import *
 
-class StockClass(pt.abi.NamedTuple):
-    id: pt.abi.Field[pt.abi.String]
-    creator: pt.abi.Field[pt.abi.String]
-
-#questo è un alias
-stocks = pt.abi.DynamicArray[StockClass]
+class Stock(abi.NamedTuple):
+    owner: abi.Field[abi.String]
+    creator: abi.Field[abi.String]
 
 class State:
-    def __init__(self):
-        self.users = BoxMapping(pt.abi.Address,stocks)
-
-
-app = bk.Application("stocksApp",state=State())
-
-@app.external
-def add_stock(owner: pt.abi.Address,id:pt.abi.String,creator:pt.abi.String):
-    """
-    mylist = [stock]
-    mylist.append(stock)
-    mylist = mylist.append(array)
-    """
-    
-   
-    return pt.Seq(
-        pt.Assert(owner.get() == pt.Global.current_application_address()),
-        (stock:= StockClass()).set(id,creator),
-        pt.If(app.state.users[owner].exists()).Then(
-            app.state.users[owner].store_into(array := stocks),
-            array.set(array + [stock]),
-            app.state.users[owner].set(array)
-        ).Else(
-          app.state.users[owner].set([stock])
-        )
+    stocks = ReservedLocalStateValue(
+        stack_type= TealType.bytes,
+        max_keys=16,
+        prefix=""
     )
 
-def remove_stock(owner:pt.abi.Address,id:pt.abi.String):
-    return pt.Seq(
-        pt.Assert(app.state.users[owner].exists()),
-        #todo: ottenere e rimuovere l'elemento dalla BoxList
-    )
+
+app = (Application("StockDapp", state=State())).apply(unconditional_opt_in_approval, initialize_local_state=True)
+
+
 @app.external
-def modify_ownership(new_owner: pt.abi.Address,old_owner: pt.abi.Address,id_stock: pt.abi.String):
-    return pt.Seq(
-        pt.Assert(app.state.users[new_owner].exists())
+def add_stock(uuid: abi.String, creator: abi.String,owner: abi.String, *, output: Stock) -> Expr:
+    return Seq(
+        (new_stock := Stock()).set(owner,creator),
+        app.state.stocks[uuid].set(new_stock.encode()),
+        output.decode(new_stock.encode())
+    )
+
+def delete_stock(uuid: abi.String) -> Expr:
+    return Seq(
+        Assert(app.state.stocks[uuid].exists()),
+        app.state.stocks[uuid].delete(),
     )
 
 @app.external
-def get_boxes_by_owner(owner: pt.abi.Address):
-    return pt.Seq(
-        pt.Assert(app.state.users[owner].exists()),
-        app.state.users[owner].get()
+def get_stock_by_uuid(uuid:abi.String, *, output: Stock) -> Expr:
+    return output.decode(app.state.stocks[uuid])
+
+@app.external
+def change_owner(uuid: abi.String,new_owner:abi.String) -> Expr:
+    return Seq(
+        Assert(app.state.stocks[uuid].exists()),
+        (stock := Stock()).decode(app.state.stocks[uuid]),
+        (creator := abi.String()).set(stock.creator),
+        (owner := abi.String()).set(stock.owner),
+        owner.set(new_owner),
+        stock.set(owner,creator),
+        app.state.stocks[uuid].set(stock.encode())
+        
     )
 
-
-#Forse devo tenere traccia di quanti box ha un owner con un altro array?
-
+@app.delete(bare=True, authorize=Authorize.only(Global.creator_address()))
+def delete() -> Expr:
+    return Approve()
 
 if __name__ == "__main__":
     app.build().export("./artifacts")
