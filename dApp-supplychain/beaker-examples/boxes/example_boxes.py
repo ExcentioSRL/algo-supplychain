@@ -166,3 +166,6 @@ def get_affirmation(
     return output.set(
         app.state.affirmations[pt.Global.round() % app.state.affirmations.elements]
     )
+
+if __name__ == "__main__":
+    app.build().export("./artifacts/main")

@@ -1,20 +1,20 @@
 #pragma version 8
-intcblock 0 1 4 65536
+intcblock 0 1
 bytecblock 0x 0x151f7c75
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l8
 txna ApplicationArgs 0
-pushbytes 0x061c3007 // "add_stock(string,string,string)(string,string)"
+pushbytes 0x9186196c // "add_stock(uint64,address,address)(address,address)"
 ==
 bnz main_l7
 txna ApplicationArgs 0
-pushbytes 0x557b6261 // "get_stock_by_uuid(string)(string,string)"
+pushbytes 0x8726fec2 // "get_stock_by_uuid(uint64)(address,address)"
 ==
 bnz main_l6
 txna ApplicationArgs 0
-pushbytes 0x5c918ea8 // "change_owner(string,string)void"
+pushbytes 0xe5a54d1b // "change_owner(uint64,address)void"
 ==
 bnz main_l5
 err
@@ -107,46 +107,23 @@ dup
 bytec_0 // ""
 dup
 frame_dig -3
+itob
 box_len
 store 1
 store 0
 load 1
+!
 assert
 frame_dig -1
-frame_bury 5
-frame_dig 5
-frame_bury 4
-intc_2 // 4
-frame_bury 2
-frame_dig 2
-frame_dig 5
-len
-+
-frame_bury 3
-frame_dig 3
-intc_3 // 65536
-<
-assert
-frame_dig 2
-itob
-extract 6 0
 frame_dig -2
-frame_bury 5
-frame_dig 4
-frame_dig 5
-concat
-frame_bury 4
-frame_dig 3
-frame_bury 2
-frame_dig 2
-itob
-extract 6 0
-concat
-frame_dig 4
 concat
 frame_bury 1
 frame_dig -3
-extract 2 0
+itob
+box_del
+pop
+frame_dig -3
+itob
 frame_dig 1
 box_put
 frame_dig 1
@@ -158,6 +135,7 @@ getstockbyuuid_2:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
+itob
 box_get
 store 3
 store 2
@@ -177,12 +155,14 @@ dup
 bytec_0 // ""
 dup
 frame_dig -2
+itob
 box_len
 store 5
 store 4
 load 5
 assert
 frame_dig -2
+itob
 box_get
 store 7
 store 6
@@ -191,61 +171,23 @@ assert
 load 6
 frame_bury 0
 frame_dig 0
-frame_dig 0
-pushint 2 // 2
-extract_uint16
-dig 1
-len
-substring3
+extract 32 0
 frame_bury 1
 frame_dig 0
-frame_dig 0
-intc_0 // 0
-extract_uint16
-frame_dig 0
-pushint 2 // 2
-extract_uint16
-substring3
+extract 0 32
 frame_bury 2
 frame_dig -1
 frame_bury 2
 frame_dig 2
-frame_bury 6
-frame_dig 6
-frame_bury 5
-intc_2 // 4
-frame_bury 3
-frame_dig 3
-frame_dig 6
-len
-+
-frame_bury 4
-frame_dig 4
-intc_3 // 65536
-<
-assert
-frame_dig 3
-itob
-extract 6 0
 frame_dig 1
-frame_bury 6
-frame_dig 5
-frame_dig 6
-concat
-frame_bury 5
-frame_dig 4
-frame_bury 3
-frame_dig 3
-itob
-extract 6 0
-concat
-frame_dig 5
 concat
 frame_bury 0
 frame_dig -2
+itob
 box_del
 pop
 frame_dig -2
+itob
 frame_dig 0
 box_put
 retsub
@@ -265,8 +207,11 @@ return
 addstockcaster_5:
 proto 0 0
 bytec_0 // ""
-dupn 3
+intc_0 // 0
+bytec_0 // ""
+dup
 txna ApplicationArgs 1
+btoi
 frame_bury 1
 txna ApplicationArgs 2
 frame_bury 2
@@ -287,8 +232,9 @@ retsub
 getstockbyuuidcaster_6:
 proto 0 0
 bytec_0 // ""
-dup
+intc_0 // 0
 txna ApplicationArgs 1
+btoi
 frame_bury 1
 frame_dig 1
 callsub getstockbyuuid_2
@@ -302,9 +248,10 @@ retsub
 // change_owner_caster
 changeownercaster_7:
 proto 0 0
+intc_0 // 0
 bytec_0 // ""
-dup
 txna ApplicationArgs 1
+btoi
 frame_bury 0
 txna ApplicationArgs 2
 frame_bury 1

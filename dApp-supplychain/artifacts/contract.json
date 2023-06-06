@@ -5,43 +5,43 @@
             "name": "add_stock",
             "args": [
                 {
-                    "type": "string",
+                    "type": "uint64",
                     "name": "uuid"
                 },
                 {
-                    "type": "string",
+                    "type": "address",
                     "name": "creator"
                 },
                 {
-                    "type": "string",
+                    "type": "address",
                     "name": "owner"
                 }
             ],
             "returns": {
-                "type": "(string,string)"
+                "type": "(address,address)"
             }
         },
         {
             "name": "get_stock_by_uuid",
             "args": [
                 {
-                    "type": "string",
+                    "type": "uint64",
                     "name": "uuid"
                 }
             ],
             "returns": {
-                "type": "(string,string)"
+                "type": "(address,address)"
             }
         },
         {
             "name": "change_owner",
             "args": [
                 {
-                    "type": "string",
+                    "type": "uint64",
                     "name": "uuid"
                 },
                 {
-                    "type": "string",
+                    "type": "address",
                     "name": "new_owner"
                 }
             ],

@@ -1,7 +1,7 @@
 from app import app, hello
 from beaker import sandbox, client
 
-app.build().export("./artifacts")
+app.build().export("../artifacts")
 
 accounts = sandbox.kmd.get_accounts()
 sender = accounts[0]
