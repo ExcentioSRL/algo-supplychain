@@ -15,13 +15,15 @@ router.get('/login',async (req,res) => {
             return res.json({result: "Wrong credentials"});
         }else{
             req.session.userId = email
-            return res.json({result: "Correct credentials"});
+            return res.status(200).json(result.nomeAzienda);
         }
     }catch (error){
         res.status(500);
         return res.json({error: "Internal Server Error"});
     }
 });
+
+
 
 router.get('/nomeAziendaByPartitaIVA',authenticate,async (req,res) => {
     try{

@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     nomeAzienda: String,
     partitaIVA: String,
+    WalletAddress: String,
 })
 const User = mongoose.model('User',userSchema)
 
@@ -19,7 +20,8 @@ const Stock = mongoose.model('Stock',stockSchema)
 
 const requestSchema = new mongoose.Schema({
     id: String,
-    newOwner: String
+    oldOwner: String,
+    requester: String
 })
 const Request = mongoose.model('Request',requestSchema)
 
