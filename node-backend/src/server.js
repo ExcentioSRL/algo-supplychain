@@ -7,9 +7,13 @@ const usersRoutes = require('./routes/users.js');
 const requestsRoutes = require('./routes/requests.js');
 const stocksRoutes = require('./routes/stocks.js');
 const {connectDB} = require('./database.js');
+const { getNewStocks } = require('./stocksIndex.js');
 
 
 connectDB();
+
+const currentBoxes = [];
+let lastID = 0; 
 
 const store = new mongoDBStore({
     uri: process.env.MONGODB_URI,
@@ -39,9 +43,15 @@ app.use('/users', usersRoutes);
 app.use('/requests', requestsRoutes);
 app.use('/stocks', stocksRoutes);
 
+setInterval(() => {
+    currentBoxes = getNewStocks(lastID)
+    lastID = currentBoxes.length - 1
+}, 5000) //requests all the boxes from the smart contract every 5 seconds
 
 app.listen(PORT, () => {
     console.log("Server listening on port 3000");
 });
 
-module.exports = {app};
+
+
+module.exports = {app,currentBoxes};

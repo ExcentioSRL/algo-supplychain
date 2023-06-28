@@ -15,7 +15,7 @@ router.get('/login',async (req,res) => {
             return res.json({result: "Wrong credentials"});
         }else{
             req.session.userId = email
-            return res.status(200).json(result.nomeAzienda);
+            return res.status(200).json(result);
         }
     }catch (error){
         res.status(500);
@@ -23,7 +23,10 @@ router.get('/login',async (req,res) => {
     }
 });
 
-
+router.get('/logout',authenticate,async (req,res) => {
+    req.session.destroy(function (err){
+    });
+});
 
 router.get('/nomeAziendaByPartitaIVA',authenticate,async (req,res) => {
     try{
