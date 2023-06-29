@@ -1,11 +1,12 @@
+import base64
 from beaker import *
 from beaker.lib.storage import (BoxMapping)
 from beaker.consts import (BOX_FLAT_MIN_BALANCE,BOX_BYTE_MIN_BALANCE)
 from pyteal import *
 from typing import Literal
+from algosdk import transaction
 
 class Stock(abi.NamedTuple):
-    #uuid: abi.Field[abi.String]
     owner: abi.Field[abi.Address] 
     creator: abi.Field[abi.Address]  
 
@@ -44,6 +45,7 @@ def get_stock_by_uuid(uuid:abi.Uint64, *, output: Stock) -> Expr:
 def change_owner(uuid: abi.Uint64,new_owner:abi.Address) -> Expr:
     return Seq(
         #come controllo che questa funzione possa essere invocata solo se possiedo il lotto?
+        #chiedere una transazione, come alla creazione, per mantere il minimum balance e restituire i fondi al creatore?
         Assert(app.state.stocks[uuid].exists()),
         (stock := Stock()).decode(app.state.stocks[uuid].get()),
         (creator := abi.Address()).set(stock.creator),

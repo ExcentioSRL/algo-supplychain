@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#removed the key
+src/mnemonic_key.txt
 # C extensions
 *.so
 
