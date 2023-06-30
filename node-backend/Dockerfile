@@ -5,4 +5,5 @@ RUN npm install
 COPY . .
 #RUN npm test
 EXPOSE 3000
-CMD ["node", "src/server.js"]
+RUN npm run tsc
+CMD ["node","src/server.js"]
