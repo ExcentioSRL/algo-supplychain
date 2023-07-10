@@ -1,10 +1,8 @@
-import base64
 from beaker import *
-from beaker.lib.storage import (BoxMapping)
-from beaker.consts import (BOX_FLAT_MIN_BALANCE,BOX_BYTE_MIN_BALANCE)
+from beaker.consts import BOX_BYTE_MIN_BALANCE, BOX_FLAT_MIN_BALANCE
+from beaker.lib.storage import BoxMapping
 from pyteal import *
-from typing import Literal
-from algosdk import transaction
+
 
 class Stock(abi.NamedTuple):
     owner: abi.Field[abi.Address] 
@@ -21,14 +19,13 @@ app = (Application("StockDapp", state=State(record_type=Stock))).apply(unconditi
 
 
 @app.external #payment: abi.PaymentTransaction,
-def add_stock(uuid: abi.Uint64, creator: abi.Address,owner: abi.Address, *, output: Stock) -> Expr:
+def add_stock(uuid: abi.Uint64, creator: abi.Address) -> Expr:
     return Seq(
         #Assert(payment.get().receiver() == Global.current_application_address()),
         #Assert(payment.get().amount() == app.state.minimum_cost),
         Assert(Not(app.state.stocks[uuid].exists())),
-        (new_stock := Stock()).set(owner,creator), 
+        (new_stock := Stock()).set(creator,creator), #sets both creator and owner to the same address
         app.state.stocks[uuid].set(new_stock),
-        output.decode(new_stock.encode())
     )
 
 def delete_stock(uuid: abi.Uint64) -> Expr:
