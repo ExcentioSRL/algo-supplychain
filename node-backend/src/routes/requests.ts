@@ -1,4 +1,3 @@
-
 import { authenticate } from '../auth.js';
 import { RequestModel } from "../database.js";
 import express, { Request,Response } from "express";

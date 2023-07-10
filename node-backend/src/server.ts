@@ -7,7 +7,7 @@ import {router as usersRoutes} from './routes/users.js';
 import {router as requestsRoutes} from './routes/requests.js';
 import {router as stocksRoutes} from './routes/stocks.js';
 import { connectDB } from './database.js';
-import {getBoxesNames,getContentForAllBoxes} from "./stocksIndex.js"
+import {getBoxesNames,getContentForAllBoxes} from "./boxes.js"
 import { StockFromBoxes } from './types.js';
 
 
@@ -46,12 +46,12 @@ app.use('/users', usersRoutes);
 app.use('/requests', requestsRoutes);
 app.use('/stocks', stocksRoutes);
 
-
 setInterval(async () => {
-    await getContentForAllBoxes(await getBoxesNames()).then(response => {
+    const boxesNames : Uint8Array[] = await getBoxesNames()
+    await getContentForAllBoxes(boxesNames).then(response => {
         currentBoxes = response
     })
-}, 10000) //requests all the boxes from the smart contract every 10 seconds
+}, 5000)  //requests all the boxes from the smart contract every 10 seconds
 
 app.listen(PORT, () => {
     console.log("Server listening on port 3000");

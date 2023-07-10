@@ -8,8 +8,6 @@ services:
       - mongo_db:/data/db
     ports:
       - "27017:27017"
-    networks:
-      - backend
 
   api:
     container_name: api
@@ -19,15 +17,9 @@ services:
       - .env
     depends_on:
       - mongo_db
-    networks:
-      - backend
     build:
       context: .
       dockerfile: Dockerfile
-
-networks:
-  backend:
-    name: backend
 
 volumes:
   mongo_db: {}

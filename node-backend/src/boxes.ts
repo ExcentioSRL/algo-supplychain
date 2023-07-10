@@ -1,39 +1,36 @@
 import pkg from  'algosdk';
+import dotenv from 'dotenv'
 import { RequestClass, StockFromBoxes, StockToSend, fromBoxesToStocks } from './types.js';
-import axios from "axios";
 
+dotenv.config()
 const {Indexer} = pkg
 
 let indexerClient: pkg.Indexer;
-let appID = 1002;
+let appID = parseInt(process.env.APP_ID!);
+
+
 
 function createIndexerClient(){
-    const token = "a".repeat(64);
-    const server = "http://172.18.0.4";
-    const port = 8980;
-    return new Indexer(token, server, port);
+    return new pkg.Indexer('', 'https://testnet-idx.algonode.cloud', '')
 
 }
- 
 
 export async function getBoxesNames(){
     if(indexerClient === undefined){
         indexerClient = createIndexerClient();
     }
     console.log("QUI0")
-    const response = await indexerClient.searchForApplicationBoxes(appID).do();
-    //const response = await axios.get("http://172.18.0.4:8980/v2/applications/"+ appID + "/boxes");
-    console.log("QUI1: " + response.boxes.length)
-    return response.boxes.map((box: { name: any; }) => box.name);
+    let data = await indexerClient.searchForApplicationBoxes(appID).do();
+    console.log("QUI1: " + data.boxes.length)
+    return data.boxes.map((box: { name: any; }) => box.name);
 }
 
 export async function getContentForAllBoxes(boxNames: Uint8Array[]){
     let result;
     let boxes : StockFromBoxes[] = [];
     for(let i=0;i<boxNames.length; i++){
-        //result = await indexerClient.lookupApplicationBoxByIDandName(appID,boxNames[i]).do();
-        result = await axios.get("http://172.18.0.4:8980/v2/applications/1002/box&name=" + boxNames[i])
-        boxes.push(new StockFromBoxes(result.data.name.toString(),result.data.value.toString(),result.data.value.toString())) //come faccio?
+        result = await indexerClient.lookupApplicationBoxByIDandName(appID,boxNames[i]).do();
+        boxes.push(new StockFromBoxes(result.name.toString(),result.value.toString(),result.value.toString())) //come faccio a parsare?
     }
     return boxes;
 }

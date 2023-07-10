@@ -18,7 +18,7 @@ export class StockToSend{
     }
 }
 
-export class StockFromBoxes {
+export class StockFromBoxes{
     id: string;
     producer: string;
     owner: string;
