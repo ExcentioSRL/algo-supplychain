@@ -10,7 +10,7 @@ if __name__== "__main__":
     app_delete_txn = transaction.ApplicationDeleteTxn(
         address,
         sp,
-        255565680 #appID già aggiornato
+        256007602 #appID già aggiornato
     )
 
     signed_delete_txn = app_delete_txn.sign(private_key)

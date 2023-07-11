@@ -1,5 +1,5 @@
-import pkg from  'algosdk';
-import dotenv from 'dotenv'
+import pkg from 'algosdk';
+import dotenv from 'dotenv';
 import { RequestClass, StockFromBoxes, StockToSend, fromBoxesToStocks } from './types.js';
 
 dotenv.config()
@@ -19,9 +19,9 @@ export async function getBoxesNames(){
     if(indexerClient === undefined){
         indexerClient = createIndexerClient();
     }
-    console.log("QUI0")
+    //console.log("QUI0")
     let data = await indexerClient.searchForApplicationBoxes(appID).do();
-    console.log("QUI1: " + data.boxes.length)
+    //console.log("QUI1: " + data.boxes.length)
     return data.boxes.map((box: { name: any; }) => box.name);
 }
 
@@ -37,8 +37,8 @@ export async function getContentForAllBoxes(boxNames: Uint8Array[]){
 
 export function filterBoxes(stocks : StockFromBoxes[], requests : RequestClass[], isMyRequest : boolean){
     let risultato : StockToSend[] = [];
-    for (var i = 0; i < requests.length; i++) {
-        for (var j = 0; j < stocks.length; j++) {
+    for (let i = 0; i < requests.length; i++) {
+        for (let j = 0; j < stocks.length; j++) {
             if (requests[i].id === stocks[j].id) {
                 let stock: StockToSend;
                 if (isMyRequest === true) {

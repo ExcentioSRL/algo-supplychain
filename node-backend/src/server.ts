@@ -54,5 +54,5 @@ setInterval(async () => {
 }, 5000)  //requests all the boxes from the smart contract every 10 seconds
 
 app.listen(PORT, () => {
-    console.log("Server listening on port 3000");
+    console.log("Server listening on port " + PORT);
 });

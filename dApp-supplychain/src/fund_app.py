@@ -12,7 +12,7 @@ if __name__ == "__main__":
     send_funds_txn = transaction.PaymentTxn(
         address,
         sp,
-        logic.get_application_address(255565680),
+        logic.get_application_address(256007602),
         amount
     )
 

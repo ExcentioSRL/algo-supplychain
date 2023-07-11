@@ -11,14 +11,10 @@
                 {
                     "type": "address",
                     "name": "creator"
-                },
-                {
-                    "type": "address",
-                    "name": "owner"
                 }
             ],
             "returns": {
-                "type": "(address,address)"
+                "type": "void"
             }
         },
         {

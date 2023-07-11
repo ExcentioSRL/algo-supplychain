@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 #removed the key
-src/mnemonic_key.txt
+src/mnemonic_keys/*
 # C extensions
 *.so
 
