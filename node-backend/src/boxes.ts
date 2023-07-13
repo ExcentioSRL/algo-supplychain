@@ -39,7 +39,8 @@ export async function filterBoxes(stocks : StockFromBoxes[], requests : RequestC
     let risultato : StockToSend[] = [];
     for (let i = 0; i < requests.length; i++) {
         for (let j = 0; j < stocks.length; j++) {
-            if (requests[i].id === stocks[j].id) {
+            console.log("i e j: " + requests[i].id + " " + stocks[j].id)
+            if (requests[i].id == stocks[j].id) {
                 let stock: StockToSend;
                 if (isMyRequest === true) {
                     stock = await fromBoxesToStocks(stocks[j], false);

@@ -11,12 +11,14 @@ export class StockToSend{
     producer: string;
     status: Status;
     requester?: string;
+    owner?: string;
 
-    constructor(id: number, producer: string, status: Status, requester?: string){
+    constructor(id: number, producer: string, status: Status, requester?: string, owner?:string){
         this.id = id
         this.producer = producer
         this.status = status
         this.requester = requester
+        this.owner = owner
     }
 }
 
@@ -62,27 +64,65 @@ export class RequestClass{
     }
 }
 
-export async function fromBoxesToStocks(stock : StockFromBoxes, isOwned : boolean, requesterWallet? : string){
+export async function fromBoxesToStocks(stock : StockFromBoxes, isOwned : boolean, requesterPIVA? : string){
     let status_stock: Status
     let requester : string | undefined;
     if(isOwned === true){
         status_stock = Status.owned
     }else{
-        if (requesterWallet === undefined){
+        if (requesterPIVA === undefined){
             status_stock = Status.requested
         }else{
             status_stock = Status.requested_by
-            /*
-            let user1Data: UserData[] = UserModel.find({ walletAddress: requesterWallet }).then(response => {
-                user1Data = response
-            })
-            requester = user1Data[0].nomeAzienda */
+            
+            let user1Data: UserData[] = await UserModel.find({ partitaIVA: requesterPIVA })
+            requester = user1Data !== undefined ? user1Data[0].nomeAzienda : undefined
+            console.log("Requester: " + requester)
         }
     }
-    let user2Data: UserData[] = []; 
-    user2Data = await UserModel.find({ walletAddress: stock.producer })
+
+    const user2Data: UserData[] = await UserModel.find({ walletAddress: stock.producer })
     const producer = user2Data[0].nomeAzienda
-    console.log("producer: " + producer)
-    return new StockToSend(stock.id, producer!,status_stock,requester)
+
+    let user3Data: UserData[] = user2Data;
+    if(stock.owner !== stock.producer){
+        user3Data = await UserModel.find({walletAddress: stock.owner})
+    }
+    const owner = user3Data[0].nomeAzienda
+    
+    return new StockToSend(stock.id, producer!, status_stock, requester,owner)
 }
 //two types of stocks: Stock from smart contract boxes and Stock to send to frontend
+export function rimuoviDuplicati(array : StockToSend[]) {
+    const set = new Set();
+    let risultato: StockToSend[] = [];
+    const comodo : StockToSend[] = [];
+    risultato = array.filter(stock => 
+        {
+            if(Status.requested_by === stock.status){
+                set.add(stock.id)
+                return true
+            }else{
+                return false;
+            }
+        }
+        )
+    array.forEach(stock => {
+        if (!set.has(stock.id)) {
+            risultato.push(stock)
+        }
+    })
+    /*array.forEach((oggetto) => {
+        if (!idMap.has(oggetto.id)) {
+            idMap.set(oggetto.id,oggetto);
+            risultato.push(oggetto);
+        } else {
+            const duplicato = idMap.get(oggetto.id);
+            if (oggetto.status === Status.requested_by) {
+                duplicato!.status = Status.requested_by;
+            }
+        }
+    });*/
+
+    return risultato;
+}

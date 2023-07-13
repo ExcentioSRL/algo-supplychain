@@ -5,16 +5,16 @@ import express, { Request,Response } from "express";
 export let router = express.Router();
 
 router.post('/createRequest',authenticate,async (req : Request,res : Response) => {
-    const {id,owner,requester} = req.body;
+    const {id,oldOwner,requester} = req.body;
     try{
-        if (id === undefined || owner === undefined || requester === undefined){
+        if (id === undefined || oldOwner === undefined || requester === undefined){
             return res.status(400).json({error: "Missing data"});
         }
         const result = await RequestModel.findOne({id});
         if(result !== null){
             return res.status(400).json({result: "Stock already requested"});
         }else{
-            const newRequest = new RequestModel({ id, owner, requester});
+            const newRequest = new RequestModel({ id, oldOwner, requester});
             const response  = newRequest.save();
             return res.status(200).json({result: "Request registered correctly"});
         }
