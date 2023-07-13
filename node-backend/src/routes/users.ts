@@ -32,7 +32,7 @@ router.get('/logout',authenticate,async (req : Request,res : Response) => {
 
 router.post('/register', async (req : Request, res: Response) => {
     try{
-        const {email, password, nomeAzienda, partitaIVA} = req.body;
+        const {email, password, nomeAzienda, partitaIVA,walletAddress} = req.body;
         if(email === undefined || password === undefined || nomeAzienda === undefined || partitaIVA === undefined){
             return res.status(400).json({error: "Some parts of data are missing"});
         }
@@ -40,7 +40,7 @@ router.post('/register', async (req : Request, res: Response) => {
         if(user !== null){
             return res.status(400).json({result: "User already exist, use another email"});
         }else{
-            const newUser = new UserModel({email,password,nomeAzienda,partitaIVA});
+            const newUser = new UserModel({email,password,nomeAzienda,partitaIVA,walletAddress});
             const response  = newUser.save();
             return res.status(200).json({result: "User registered correctly"});
         }

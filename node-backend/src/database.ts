@@ -8,15 +8,15 @@ const userSchema = new Schema({
     password: String,
     nomeAzienda: String,
     partitaIVA: String,
-    WalletAddress: String,
+    walletAddress: String
 })
 export const UserModel = model('User',userSchema)
 
 
 const requestSchema = new Schema({
     id: String,
-    oldOwner: String,
-    requester: String
+    oldOwner: String, //pIVA
+    requester: String //pIVA
 })
 export const RequestModel = model('Request',requestSchema)
 

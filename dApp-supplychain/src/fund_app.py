@@ -7,7 +7,7 @@ if __name__ == "__main__":
     algod_client = v2client.algod.AlgodClient("","https://testnet-api.algonode.cloud","")
 
     sp=algod_client.suggested_params()
-    amount = 100000
+    amount = 1000000
     #send funds to the contract
     send_funds_txn = transaction.PaymentTxn(
         address,
