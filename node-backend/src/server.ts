@@ -2,13 +2,14 @@ import dotenv from 'dotenv'
 import express,{Express,Request,Response} from "express";
 import session from "express-session"
 import {default as connectMongoDBStore} from "connect-mongodb-session"
-
+import * as http from "http"
+import * as io from "socket.io"
 import {router as usersRoutes} from './routes/users.js';
 import {router as requestsRoutes} from './routes/requests.js';
-import {router as stocksRoutes} from './routes/stocks.js';
 import { connectDB } from './database.js';
-import {getBoxesNames,getContentForAllBoxes} from "./boxes.js"
-import { StockFromBoxes } from './types.js';
+import {getBoxesNames,getContentForAllBoxes, getContentForBox, updateBoxesWithNewBox} from "./boxes.js"
+import { Box, RequestClass } from './types.js';
+import { getStocksByOwner } from './routes/stocks.js';
 
 
 
@@ -16,14 +17,20 @@ dotenv.config();
 connectDB();
 const mongoDBStore = connectMongoDBStore(session)
 
-export let currentBoxes : StockFromBoxes[] = [];
+export let currentBoxes : Box[] = [];
 
 const store = new mongoDBStore({
     uri: process.env.MONGODB_URI!,
     collection: 'sessions'
 });
-const PORT = process.env.PORT;
+
+const ENDPOINTS_PORT = process.env.ENDPOINTS_PORT;
+const SOCKET_PORT = process.env.SOCKET_PORT;
+
 export const app : Express = express();
+const server = http.createServer(app) 
+const socket = new io.Server(server)
+let sockets = new Map<string,string>()
 
 app.use(session({
     secret: "fh7yn9a", //testa Math.random()
@@ -44,15 +51,43 @@ app.use(function (req : Request,res : Response,next){
 app.use(express.json());
 app.use('/users', usersRoutes);
 app.use('/requests', requestsRoutes);
-app.use('/stocks', stocksRoutes);
 
-setInterval(async () => {
-    const boxesNames : Uint8Array[] = await getBoxesNames()
-    await getContentForAllBoxes(boxesNames).then(response => {
-        currentBoxes = response
-    })
-}, 5000)  //requests all the boxes from the smart contract every 10 seconds
+const boxesNames: Uint8Array[] = await getBoxesNames()
+await getContentForAllBoxes(boxesNames).then(response => {
+    currentBoxes = response
+})
 
-app.listen(PORT, () => {
-    console.log("Server listening on port " + PORT);
+
+
+server.listen(SOCKET_PORT, () => {
+    console.log("Server sockets listening on port " + SOCKET_PORT);
+})
+app.listen(ENDPOINTS_PORT, () => {
+    console.log("Server endpoints listening on port " + ENDPOINTS_PORT);
 });
+
+socket.on('connection', (socket) => {
+
+    socket.on('wallet_login',async (wallet: string) => {
+        sockets.set(socket.id, wallet)
+        const stocks = await getStocksByOwner(wallet)
+        socket.send(stocks)
+    })
+
+    socket.on('stock_creation',async (uuid: Uint8Array) => {
+        currentBoxes.push(await getContentForBox(uuid))
+        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.send(stocks)
+    })
+
+    socket.on('stock_change_ownership', async (box : Box) => {
+        updateBoxesWithNewBox(box)
+        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.send(stocks)
+    })
+
+    socket.on('create_request', async (request: RequestClass) => {
+        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.send(stocks)
+    })
+})

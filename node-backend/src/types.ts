@@ -1,12 +1,11 @@
-import { UserModel } from "./database.js";
-
-enum Status {
+export enum Status {
     owned = "owned",
     requested = "requested",
-    requested_by = "requested by"
+    requested_by = "requested by",
+    unavailable = "unavailable"
 }
 
-export class StockToSend{
+export class Stock{
     id: string;
     producer: string;
     status: Status;
@@ -36,12 +35,11 @@ export class UserData{
         this.partitaIVA = partitaIVA
         this.walletAddress = walletAddress
     }
-
 }
 
-export class StockFromBoxes{
-    id: string ;
-    producer: string ;
+export class Box{
+    id: string;
+    producer: string;
     owner: string;
 
     constructor(id: string, producer: string, owner: string){
@@ -64,53 +62,3 @@ export class RequestClass{
     }
 }
 
-export async function fromBoxesToStocks(stock : StockFromBoxes, isOwned : boolean, requesterPIVA? : string){
-    let status_stock: Status
-    let requester : string | undefined;
-    if(isOwned === true){
-        status_stock = Status.owned
-    }else{
-        if (requesterPIVA === undefined){
-            status_stock = Status.requested
-        }else{
-            status_stock = Status.requested_by
-            
-            let user1Data: UserData[] = await UserModel.find({ partitaIVA: requesterPIVA })
-            requester = user1Data !== undefined ? user1Data[0].nomeAzienda : undefined
-            console.log("Requester: " + requester)
-        }
-    }
-
-    const user2Data: UserData[] = await UserModel.find({ walletAddress: stock.producer })
-    const producer = user2Data[0].nomeAzienda
-
-    let user3Data: UserData[] = user2Data;
-    if(stock.owner !== stock.producer){
-        user3Data = await UserModel.find({walletAddress: stock.owner})
-    }
-    const owner = user3Data[0].nomeAzienda
-    
-    return new StockToSend(stock.id, producer!, status_stock, requester,owner)
-}
-//two types of stocks: Stock from smart contract boxes and Stock to send to frontend
-export function rimuoviDuplicati(array : StockToSend[]) {
-    const set = new Set();
-    let risultato: StockToSend[] = [];
-    const comodo : StockToSend[] = [];
-    risultato = array.filter(stock => 
-        {
-            if(Status.requested_by === stock.status){
-                set.add(stock.id)
-                return true
-            }else{
-                return false;
-            }
-        }
-        )
-    array.forEach(stock => {
-        if (!set.has(stock.id)) {
-            risultato.push(stock)
-        }
-    })
-    return risultato;
-}

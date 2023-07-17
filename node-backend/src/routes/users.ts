@@ -68,34 +68,3 @@ router.put('/changePassword',authenticate,async (req : Request,res : Response) =
         return res.status(500).json({error: "Internal Server Error"});
     }
 })
-
-router.delete('/removeUser',authenticate,async (req : Request,res : Response) => {
-    const {email,password} = req.query;
-    try{
-        if(email === undefined || password === undefined){
-            return res.status(400).json({error: "Some parts of data are missing"});
-        }
-        const result = await UserModel.findOne({email,password});
-        if(result === null){
-            return res.status(404).json({result: "User not found"});
-        }else{
-            await UserModel.deleteOne({email,password});
-            return res.status(200).json({result: "User deleted correctly"});
-        }
-    }catch (error){
-        return res.status(500).json({error: "Internal Server Error"});
-    }
-})
-
-router.get('/searchUsers',authenticate,async (req: Request, res: Response) => {
-    const {data} = req.query
-    try{
-        if(data === undefined){
-            return res.status(400).json({ error: "Data is missing" });
-        }
-        const result = await UserModel.find({data});
-        return res.status(200).json(result)
-    }catch(error){
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-})
