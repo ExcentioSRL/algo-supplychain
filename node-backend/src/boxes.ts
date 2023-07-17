@@ -29,9 +29,8 @@ export async function getContentForAllBoxes(boxNames: Uint8Array[]){
     for(let i=0;i<boxNames.length; i++){
         result = await indexerClient.lookupApplicationBoxByIDandName(appID,boxNames[i]).do();
         addresses = parseBoxData(result.value);
-        boxes.push(new StockFromBoxes(pkg.decodeUint64(result.name,"safe"),addresses[0],addresses[1]));
+        boxes.push(new StockFromBoxes(parseBoxName(result.name),addresses[0],addresses[1]));
     }
-    console.log("Lunghezza1: " + boxes.length)
     return boxes;
 }
 
@@ -39,7 +38,6 @@ export async function filterBoxes(stocks : StockFromBoxes[], requests : RequestC
     let risultato : StockToSend[] = [];
     for (let i = 0; i < requests.length; i++) {
         for (let j = 0; j < stocks.length; j++) {
-            console.log("i e j: " + requests[i].id + " " + stocks[j].id)
             if (requests[i].id == stocks[j].id) {
                 let stock: StockToSend;
                 if (isMyRequest === true) {
@@ -58,6 +56,12 @@ function parseBoxData(data : Uint8Array){
     let stringTupleCodec = pkg.ABIType.from('(address,address)')
     let decodedData = stringTupleCodec.decode(data).toString()
     return decodedData.split(",")
+}
+
+function parseBoxName(data: Uint8Array){
+    const decodedData = new TextDecoder().decode(data)
+    console.log("QUIII: " + decodedData)
+    return decodedData
 }
 
 

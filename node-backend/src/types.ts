@@ -7,13 +7,13 @@ enum Status {
 }
 
 export class StockToSend{
-    id: number;
+    id: string;
     producer: string;
     status: Status;
     requester?: string;
     owner?: string;
 
-    constructor(id: number, producer: string, status: Status, requester?: string, owner?:string){
+    constructor(id: string, producer: string, status: Status, requester?: string, owner?:string){
         this.id = id
         this.producer = producer
         this.status = status
@@ -40,11 +40,11 @@ export class UserData{
 }
 
 export class StockFromBoxes{
-    id: number ;
+    id: string ;
     producer: string ;
     owner: string;
 
-    constructor(id: number, producer: string, owner: string){
+    constructor(id: string, producer: string, owner: string){
         this.id = id
         this.producer = producer
         this.owner = owner
@@ -53,11 +53,11 @@ export class StockFromBoxes{
 }
 
 export class RequestClass{
-    id: number;
+    id: string;
     oldOwner: string;
     requester: string;
 
-    constructor(id: number,oldOwner: string, requester: string){
+    constructor(id: string,oldOwner: string, requester: string){
         this.id = id
         this.oldOwner = oldOwner
         this.requester = requester
@@ -112,17 +112,5 @@ export function rimuoviDuplicati(array : StockToSend[]) {
             risultato.push(stock)
         }
     })
-    /*array.forEach((oggetto) => {
-        if (!idMap.has(oggetto.id)) {
-            idMap.set(oggetto.id,oggetto);
-            risultato.push(oggetto);
-        } else {
-            const duplicato = idMap.get(oggetto.id);
-            if (oggetto.status === Status.requested_by) {
-                duplicato!.status = Status.requested_by;
-            }
-        }
-    });*/
-
     return risultato;
 }

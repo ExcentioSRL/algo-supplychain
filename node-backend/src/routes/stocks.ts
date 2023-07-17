@@ -23,32 +23,28 @@ router.get('/getStocks',authenticate,async (req : Request,res : Response) =>{
             return res.status(404).send({error: "no wallet associated with this account"})
         }
         const userPIVA = userData[0].partitaIVA
-        /*getting all users requests and separating them between his requetsts on others stocks and others requests on his stocks */
 
+        /*getting all users requests and separating them between his requetsts on others stocks and others requests on his stocks */
         const allRequests: RequestClass[] = await RequestModel.find({ oldOwner: userPIVA } || {requester: userPIVA});
         const othersRequests = allRequests.filter(request => {return request.oldOwner === userPIVA})
-        //const myRequests = allRequests.filter(request => {return request.requester === userPIVA})
-        console.log("LUNGHEZZA OTHERS: " + othersRequests.length)
+        const myRequests = allRequests.filter(request => {return request.requester === userPIVA})
 
         //getting all of his boxes
         let myBoxes: StockFromBoxes[] = temporaryBoxes.filter(box => {
             return box.owner == userData[0].walletAddress
         })  //my boxes
 
-        let result : StockToSend[] = await Promise.all(myBoxes.map(box => fromBoxesToStocks(box, true)))
+        let result: StockToSend[] = await Promise.all(myBoxes.map(box => fromBoxesToStocks(box, true)))//my stocks 
         result = result.concat(await filterBoxes(myBoxes,othersRequests,false)) //others requests on my boxes
-         //my stocks 
-        //my boxes that got requested //await filterBoxes(temporaryBoxes,othersRequests,false)
+        result.concat(await filterBoxes(temporaryBoxes, myRequests, true)) //my boxes that got requested 
         
         return res.status(200).json(rimuoviDuplicati(result))
     }catch(error){
-        res.status(500);
-        console.log("OLA " + error)
-        return res.json({error: "Internal Server Error"});
+        return res.status(500).json({error: "Internal Server Error"});
     }
 });
 
-router.get('searchStocks', authenticate, async (req: Request, res: Response) => {
+router.get('/searchStocks', authenticate, async (req: Request, res: Response) => {
     const {data} = req.query
     if(data === undefined){
         res.status(400);
