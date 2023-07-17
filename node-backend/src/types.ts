@@ -77,7 +77,6 @@ export async function fromBoxesToStocks(stock : StockFromBoxes, isOwned : boolea
             
             let user1Data: UserData[] = await UserModel.find({ partitaIVA: requesterPIVA })
             requester = user1Data !== undefined ? user1Data[0].nomeAzienda : undefined
-            console.log("Requester: " + requester)
         }
     }
 
@@ -93,6 +92,8 @@ export async function fromBoxesToStocks(stock : StockFromBoxes, isOwned : boolea
     return new StockToSend(stock.id, producer!, status_stock, requester,owner)
 }
 //two types of stocks: Stock from smart contract boxes and Stock to send to frontend
+
+
 export function rimuoviDuplicati(array : StockToSend[]) {
     const set = new Set();
     let risultato: StockToSend[] = [];

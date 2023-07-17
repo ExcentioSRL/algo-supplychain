@@ -24,7 +24,7 @@ router.get('/getStocks',authenticate,async (req : Request,res : Response) =>{
         }
         const userPIVA = userData[0].partitaIVA
 
-        /*getting all users requests and separating them between his requetsts on others stocks and others requests on his stocks */
+        /*getting all users requests and separating them between his requests on others stocks and others requests on his stocks */
         const allRequests: RequestClass[] = await RequestModel.find({ oldOwner: userPIVA } || {requester: userPIVA});
         const othersRequests = allRequests.filter(request => {return request.oldOwner === userPIVA})
         const myRequests = allRequests.filter(request => {return request.requester === userPIVA})
@@ -44,8 +44,8 @@ router.get('/getStocks',authenticate,async (req : Request,res : Response) =>{
     }
 });
 
-router.get('/searchStocks', authenticate, async (req: Request, res: Response) => {
-    const {data} = req.query
+router.get('/searchStocks', async (req: Request, res: Response) => {
+    let data = req.query.data
     if(data === undefined){
         res.status(400);
         return res.json({ error: "Missing data" });
@@ -53,20 +53,32 @@ router.get('/searchStocks', authenticate, async (req: Request, res: Response) =>
     try{
         const temporaryBoxes: StockFromBoxes[] = currentBoxes;
         let result;
-        const usersData : UserData[] = await UserModel.find({nomeAzienda: data});
-        if(usersData !== undefined){
+        const usersData: UserData[] = await UserModel.find(
+            {
+                //inserisci l'OR
+                nomeAzienda: {
+                    "$regex": escapeRegex(data)}
+            }
+            );
+        if(usersData.length !== 0){
             const matchingBoxesByUserData = temporaryBoxes.filter(box => {
                 return usersData[0].walletAddress === box.owner || usersData[0].walletAddress === box.producer
             })
             result = await Promise.all(matchingBoxesByUserData.map(box => fromBoxesToStocks(box, true)))
         }else{
             const matchingBoxesByID = temporaryBoxes.filter(box => {
-                return box.id.toString() === data.toString()
+                return box.id.includes(data!.toString())
             })
             result = await Promise.all(matchingBoxesByID.map(box => fromBoxesToStocks(box, true)))
         }
         return res.status(200).json(result);
     }catch(error){
-
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 })
+
+
+
+function escapeRegex(text : any) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}

@@ -4,20 +4,28 @@ bytecblock 0x
 txn NumAppArgs
 intc_0 // 0
 ==
-bnz main_l8
-txna ApplicationArgs 0
-pushbytes 0x47f6ea19 // "add_stock(uint64,address)void"
-==
-bnz main_l7
-txna ApplicationArgs 0
-pushbytes 0x8726fec2 // "get_stock_by_uuid(uint64)(address,address)"
-==
 bnz main_l6
 txna ApplicationArgs 0
-pushbytes 0xe5a54d1b // "change_owner(uint64,address)void"
+pushbytes 0x97bc0adf // "add_stock(string,address)void"
 ==
 bnz main_l5
+txna ApplicationArgs 0
+pushbytes 0xe2c7f090 // "change_owner(string,address)void"
+==
+bnz main_l4
 err
+main_l4:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub changeownercaster_5
+intc_1 // 1
+return
 main_l5:
 txn OnCompletion
 intc_0 // NoOp
@@ -27,56 +35,32 @@ intc_0 // 0
 !=
 &&
 assert
-callsub changeownercaster_7
+callsub addstockcaster_4
 intc_1 // 1
 return
 main_l6:
 txn OnCompletion
 intc_0 // NoOp
 ==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub getstockbyuuidcaster_6
-intc_1 // 1
-return
-main_l7:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub addstockcaster_5
-intc_1 // 1
-return
-main_l8:
-txn OnCompletion
-intc_0 // NoOp
-==
-bnz main_l14
+bnz main_l12
 txn OnCompletion
 intc_1 // OptIn
 ==
-bnz main_l13
+bnz main_l11
 txn OnCompletion
 pushint 5 // DeleteApplication
 ==
-bnz main_l12
+bnz main_l10
 err
-main_l12:
+main_l10:
 txn ApplicationID
 intc_0 // 0
 !=
 assert
-callsub delete_4
+callsub delete_3
 intc_1 // 1
 return
-main_l13:
+main_l11:
 txn ApplicationID
 intc_0 // 0
 !=
@@ -84,7 +68,7 @@ assert
 callsub optin_0
 intc_1 // 1
 return
-main_l14:
+main_l12:
 txn ApplicationID
 intc_0 // 0
 ==
@@ -106,7 +90,7 @@ dup
 bytec_0 // ""
 dup
 frame_dig -2
-itob
+extract 2 0
 box_len
 store 1
 store 0
@@ -118,32 +102,17 @@ frame_dig -1
 concat
 frame_bury 0
 frame_dig -2
-itob
+extract 2 0
 box_del
 pop
 frame_dig -2
-itob
+extract 2 0
 frame_dig 0
 box_put
 retsub
 
-// get_stock_by_uuid
-getstockbyuuid_2:
-proto 1 1
-bytec_0 // ""
-frame_dig -1
-itob
-box_get
-store 3
-store 2
-load 3
-assert
-load 2
-frame_bury 0
-retsub
-
 // change_owner
-changeowner_3:
+changeowner_2:
 proto 2 0
 bytec_0 // ""
 dupn 2
@@ -152,20 +121,20 @@ dup
 bytec_0 // ""
 dup
 frame_dig -2
-itob
+extract 2 0
 box_len
+store 3
+store 2
+load 3
+assert
+frame_dig -2
+extract 2 0
+box_get
 store 5
 store 4
 load 5
 assert
-frame_dig -2
-itob
-box_get
-store 7
-store 6
-load 7
-assert
-load 6
+load 4
 frame_bury 0
 frame_dig 0
 extract 32 0
@@ -180,17 +149,17 @@ frame_dig 1
 concat
 frame_bury 0
 frame_dig -2
-itob
+extract 2 0
 box_del
 pop
 frame_dig -2
-itob
+extract 2 0
 frame_dig 0
 box_put
 retsub
 
 // delete
-delete_4:
+delete_3:
 proto 0 0
 txn Sender
 global CreatorAddress
@@ -201,12 +170,11 @@ intc_1 // 1
 return
 
 // add_stock_caster
-addstockcaster_5:
+addstockcaster_4:
 proto 0 0
-intc_0 // 0
 bytec_0 // ""
+dup
 txna ApplicationArgs 1
-btoi
 frame_bury 0
 txna ApplicationArgs 2
 frame_bury 1
@@ -215,34 +183,16 @@ frame_dig 1
 callsub addstock_1
 retsub
 
-// get_stock_by_uuid_caster
-getstockbyuuidcaster_6:
-proto 0 0
-bytec_0 // ""
-intc_0 // 0
-txna ApplicationArgs 1
-btoi
-frame_bury 1
-frame_dig 1
-callsub getstockbyuuid_2
-frame_bury 0
-pushbytes 0x151f7c75 // 0x151f7c75
-frame_dig 0
-concat
-log
-retsub
-
 // change_owner_caster
-changeownercaster_7:
+changeownercaster_5:
 proto 0 0
-intc_0 // 0
 bytec_0 // ""
+dup
 txna ApplicationArgs 1
-btoi
 frame_bury 0
 txna ApplicationArgs 2
 frame_bury 1
 frame_dig 0
 frame_dig 1
-callsub changeowner_3
+callsub changeowner_2
 retsub

@@ -60,7 +60,6 @@ function parseBoxData(data : Uint8Array){
 
 function parseBoxName(data: Uint8Array){
     const decodedData = new TextDecoder().decode(data)
-    console.log("QUIII: " + decodedData)
     return decodedData
 }
 
