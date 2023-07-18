@@ -1,21 +1,22 @@
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 import express,{Express,Request,Response} from "express";
-import session from "express-session"
-import {default as connectMongoDBStore} from "connect-mongodb-session"
-import * as http from "http"
-import * as io from "socket.io"
-import {router as usersRoutes} from './routes/users.js';
-import {router as requestsRoutes} from './routes/requests.js';
-import { connectDB } from './database.js';
-import {getBoxesNames,getContentForAllBoxes, getContentForBox, updateBoxesWithNewBox} from "./boxes.js"
-import { Box, RequestClass } from './types.js';
-import { getStocksByOwner } from './routes/stocks.js';
+import session from "express-session";
+import {default as connectMongoDBStore} from "connect-mongodb-session";
+import * as http from "http";
+import * as io from "socket.io";
 
+import {router as usersRoutes} from './routes/users.js';
+import { connectDB } from './database.js';
+import {getBoxesNames,getContentForAllBoxes, getContentForBox} from "./indexer.js";
+import { Box, RequestClass, Stock } from './types.js';
+import { getStocksByOwner } from './helpers/helper_stocks.js';
+import { updateBoxesWithChangedBox } from './indexer.js';
+import { createRequest } from './helpers/helper_requests.js';
 
 
 dotenv.config();
 connectDB();
-const mongoDBStore = connectMongoDBStore(session)
+const mongoDBStore = connectMongoDBStore(session);
 
 export let currentBoxes : Box[] = [];
 
@@ -28,9 +29,9 @@ const ENDPOINTS_PORT = process.env.ENDPOINTS_PORT;
 const SOCKET_PORT = process.env.SOCKET_PORT;
 
 export const app : Express = express();
-const server = http.createServer(app) 
-const socket = new io.Server(server)
-let sockets = new Map<string,string>()
+const server = http.createServer(app); 
+const serverSocket = new io.Server(server);
+let sockets = new Map<string,string>();
 
 app.use(session({
     secret: "fh7yn9a", //testa Math.random()
@@ -50,44 +51,60 @@ app.use(function (req : Request,res : Response,next){
 });
 app.use(express.json());
 app.use('/users', usersRoutes);
-app.use('/requests', requestsRoutes);
 
-const boxesNames: Uint8Array[] = await getBoxesNames()
-await getContentForAllBoxes(boxesNames).then(response => {
+
+await getContentForAllBoxes(await getBoxesNames()).then(response => {
     currentBoxes = response
-})
-
-
+});
 
 server.listen(SOCKET_PORT, () => {
     console.log("Server sockets listening on port " + SOCKET_PORT);
-})
+});
 app.listen(ENDPOINTS_PORT, () => {
     console.log("Server endpoints listening on port " + ENDPOINTS_PORT);
 });
 
-socket.on('connection', (socket) => {
+serverSocket.on('connection', (socket) => {
 
     socket.on('wallet_login',async (wallet: string) => {
         sockets.set(socket.id, wallet)
-        const stocks = await getStocksByOwner(wallet)
-        socket.send(stocks)
+        const stocks : Stock[] = await getStocksByOwner(wallet)
+        socket.to(socket.id).emit("stocks",stocks)
+    });
+
+    socket.on('wallet_logout', async() => {
+        sockets.delete(socket.id)
     })
 
     socket.on('stock_creation',async (uuid: Uint8Array) => {
         currentBoxes.push(await getContentForBox(uuid))
-        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.send(stocks)
-    })
+        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.to(socket.id).emit("stocks",stocks)
+    });
 
-    socket.on('stock_change_ownership', async (box : Box) => {
-        updateBoxesWithNewBox(box)
-        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.send(stocks)
-    })
+    socket.on('stock_change_ownership', async (id : string) => {
+        await updateBoxesWithChangedBox(id)
+        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.to(socket.id).emit("stocks",stocks)
+    });
 
     socket.on('create_request', async (request: RequestClass) => {
-        const stocks = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.send(stocks)
-    })
-})
+        await createRequest(request).then((resolve) => {
+            socket.to(socket.id).emit("create_request_fulfilled", resolve)
+        }).catch((error) => {
+            socket.to(socket.id).emit("create_request_rejected", error)
+        })
+        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.to(socket.id).emit("stocks",stocks)
+    });
+
+    socket.on('delete_request',async (request: RequestClass) => {
+        await createRequest(request).then((resolve) => {
+            socket.to(socket.id).emit("delete_request_fulfilled", resolve)
+        }).catch((error) => {
+            socket.to(socket.id).emit("delete_request_rejected", error)
+        })
+        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        socket.to(socket.id).emit("stocks",stocks)
+    });
+});
