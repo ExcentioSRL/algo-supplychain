@@ -1,6 +1,7 @@
 import {Status,Box,Stock,UserData,RequestClass} from "./types.js"
-import { UserModel } from "./database.js";
+import { RequestModel, UserModel } from "./database.js";
 import * as sdk from "algosdk"
+import { currentBoxes } from "./server.js";
 
 export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:string){
     const producer = await getNameFromAddress(box.producer)
@@ -20,7 +21,7 @@ async function getNameFromAddress(walletAddress : string){
     return owner
 }
 
-export function rimuoviDuplicati(array: Stock[]) {
+export function removeDuplicates(array: Stock[]) {
     const set = new Set();
     let risultato: Stock[] = [];
     risultato = array.filter(stock => {
@@ -40,17 +41,16 @@ export function rimuoviDuplicati(array: Stock[]) {
     return risultato;
 }
 
-
-export async function filterBoxes(stocks: Box[], requests: RequestClass[], isMyRequest: boolean) {
+export async function filterBoxes(boxes: Box[], requests: RequestClass[], areMyRequests: boolean) {
     let risultato: Stock[] = [];
     for (let i = 0; i < requests.length; i++) {
-        for (let j = 0; j < stocks.length; j++) {
-            if (requests[i].id == stocks[j].id) {
+        for (let j = 0; j < boxes.length; j++) {
+            if (requests[i].id == boxes[j].id) {
                 let stock: Stock;
-                if (isMyRequest === true) {
-                    stock = await fromBoxToStock(stocks[j], Status.requested);
+                if (areMyRequests === true) {
+                    stock = await fromBoxToStock(boxes[j], Status.requested);
                 } else {
-                    stock = await fromBoxToStock(stocks[j], Status.requested_by, requests[i].requester);
+                    stock = await fromBoxToStock(boxes[j], Status.requested_by, requests[i].requester);
                 }
                 risultato.push(stock);
             }
@@ -68,4 +68,35 @@ export function parseBoxData(data: Uint8Array) {
 export function parseBoxName(data: Uint8Array) {
     const decodedData = new TextDecoder().decode(data)
     return decodedData
+}
+
+
+export async function getStocksByOwner(ownerWallet: string): Promise<Stock[]> {
+    const filteredBoxes = currentBoxes.filter(box => {
+        return box.owner == ownerWallet
+    })
+
+    const allRequests = await getRequestsByWallet(ownerWallet)
+
+    let result = await Promise.all(filteredBoxes.map(box => fromBoxToStock(box, Status.owned))) //my stocks
+    result.concat(await filterBoxes(filteredBoxes, allRequests[0], false)) //others requests on my stocks
+    result.concat(await filterBoxes(currentBoxes, allRequests[1], true)) //my requests on others stocks
+    return removeDuplicates(result)
+}
+
+async function getRequestsByWallet(wallet: string): Promise<RequestClass[][]> {
+    /*getting user Data */
+    const userData: UserData[] = await UserModel.find({ walletAddress: wallet })
+    if (userData[0].walletAddress === undefined) {
+        throw new Error("No wallet associated with this account")
+    }
+    const userPIVA = userData[0].partitaIVA
+
+    /*getting all users requests and separating them between his requests on others stocks and others requests on his stocks */
+    const allRequests: RequestClass[] = await RequestModel.find({ oldOwner: userPIVA } || { requester: userPIVA });
+    const othersRequests = allRequests.filter(request => { return request.oldOwner === userPIVA })
+    const myRequests = allRequests.filter(request => { return request.requester === userPIVA })
+
+    return [othersRequests, myRequests];
+
 }
