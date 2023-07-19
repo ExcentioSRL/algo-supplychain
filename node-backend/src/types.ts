@@ -1,3 +1,7 @@
+export type partitaIVA = string
+export type walletAddress = string
+//created types to remove ambiguity
+
 export enum Status {
     owned = "owned",
     requested = "requested",
@@ -25,10 +29,10 @@ export class UserData{
     email?: string | undefined;
     password?: string | undefined;
     nomeAzienda?: string | undefined;
-    partitaIVA?: string | undefined;
-    walletAddress?: string | undefined;
+    partitaIVA?: partitaIVA | undefined;
+    walletAddress?: walletAddress | undefined;
 
-    constructor(email?: string, password?: string, nomeAzienda?: string, partitaIVA?:string, walletAddress? : string){
+    constructor(email?: string, password?: string, nomeAzienda?: string, partitaIVA?: partitaIVA, walletAddress?: walletAddress){
         this.email = email
         this.password = password
         this.nomeAzienda = nomeAzienda
@@ -39,10 +43,10 @@ export class UserData{
 
 export class Box{
     id: string;
-    producer: string;
-    owner: string;
+    producer: walletAddress;
+    owner: walletAddress;
 
-    constructor(id: string, producer: string, owner: string){
+    constructor(id: string, producer: walletAddress, owner: walletAddress){
         this.id = id
         this.producer = producer
         this.owner = owner
@@ -52,8 +56,8 @@ export class Box{
 
 export class RequestClass{
     id: string;
-    oldOwner: string;
-    requester: string;
+    oldOwner: partitaIVA;
+    requester: partitaIVA;
 
     constructor(id: string,oldOwner: string, requester: string){
         this.id = id

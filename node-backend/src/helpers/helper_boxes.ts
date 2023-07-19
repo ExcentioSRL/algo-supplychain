@@ -1,9 +1,9 @@
-import {Status,Box,Stock,UserData,RequestClass} from "../types.js"
+import {Status,Box,Stock,UserData,RequestClass, partitaIVA} from "../types.js"
 import { UserModel } from "../database.js";
 import * as sdk from "algosdk"
 import { getNameFromAddress } from "./helper_users.js";
 
-export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:string){
+export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:partitaIVA){
     const producer : string = await getNameFromAddress(box.producer)
     let owner : string;
     if(box.producer === box.owner){

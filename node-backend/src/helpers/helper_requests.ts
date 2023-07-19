@@ -1,6 +1,6 @@
 import { RequestModel } from "../database.js";
 import { RequestClass } from "../types.js";
-import { getPIVAfromAddress } from "./helper_users.js";
+import { getPIVAfromAddress, getPIVAfromName } from "./helper_users.js";
 
 
 export async function getRequestsByWallet(wallet: string): Promise<RequestClass[][]> {
@@ -13,19 +13,18 @@ export async function getRequestsByWallet(wallet: string): Promise<RequestClass[
     return [othersRequests, myRequests];
 }
 
-export async function createRequest(request: RequestClass): Promise<string> {
-    const id : string = request.id
-    const oldOwner : string = request.oldOwner
-    const requester : string = request.requester
+export async function createRequest(id: string,oldOwner: string, requester: string): Promise<string> {
     try{
-        if(!checkRequest(request)){
+        if(!checkRequest(id,oldOwner,requester)){
             return Promise.reject("An invalid request was provided");
         }
         const result = await RequestModel.findOne({id});
         if(result !== null){
             return Promise.reject("The provided requests already exist");
         }else{
-            const newRequest = new RequestModel({ id, oldOwner, requester});
+            const oldOwnerPIVA = await getPIVAfromName(oldOwner)
+            const requesterPIVA = await getPIVAfromName(requester)
+            const newRequest = new RequestModel({ id, oldOwnerPIVA, requesterPIVA});
             const response  = await newRequest.save();
             return Promise.resolve("Request deleted correctly");
         }
@@ -34,12 +33,8 @@ export async function createRequest(request: RequestClass): Promise<string> {
     } 
 }
 
-export async function deleteRequest(request: RequestClass) : Promise<string>{
-    const id : string = request.id
+export async function deleteRequest(id: string) : Promise<string>{
     try{
-        if(!checkRequest(request)){
-            return Promise.reject("An invalid request was provided");
-        }
         const result = await RequestModel.findOne({id});
         if(result === null){
             return Promise.reject("The provided requests doesn't exist");
@@ -52,13 +47,13 @@ export async function deleteRequest(request: RequestClass) : Promise<string>{
     }
 }
 
-function checkRequest(request: RequestClass) : boolean{
+function checkRequest(id: string,oldOwner: string,requester: string) : boolean{
     let check : boolean = true
-    if(request.id === undefined || request.id === null)
+    if(id === undefined || id === null)
         check = false
-    if(request.oldOwner === undefined || request.oldOwner === null)
+    if(oldOwner === undefined || oldOwner === null)
         check=false
-    if(request.requester === undefined || request.requester === null)
+    if(requester === undefined || requester === null)
         check=false
     return check
 }

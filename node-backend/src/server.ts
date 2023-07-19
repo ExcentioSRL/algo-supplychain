@@ -8,10 +8,10 @@ import * as io from "socket.io";
 import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
 import {getBoxesNames,getContentForAllBoxes, getContentForBox} from "./indexer.js";
-import { Box, RequestClass, Stock } from './types.js';
+import { Box, RequestClass, Stock, walletAddress } from './types.js';
 import { getStocksByOwner } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
-import { createRequest } from './helpers/helper_requests.js';
+import { createRequest, deleteRequest } from './helpers/helper_requests.js';
 
 
 dotenv.config();
@@ -64,9 +64,10 @@ app.listen(ENDPOINTS_PORT, () => {
     console.log("Server endpoints listening on port " + ENDPOINTS_PORT);
 });
 
+/* --- rimuovere socket ID e usare i cookie? */
 serverSocket.on('connection', (socket) => {
 
-    socket.on('wallet_login',async (wallet: string) => {
+    socket.on('wallet_login',async (wallet: walletAddress) => {
         sockets.set(socket.id, wallet)
         const stocks : Stock[] = await getStocksByOwner(wallet)
         socket.to(socket.id).emit("stocks",stocks)
@@ -76,8 +77,8 @@ serverSocket.on('connection', (socket) => {
         sockets.delete(socket.id)
     })
 
-    socket.on('stock_creation',async (uuid: Uint8Array) => {
-        currentBoxes.push(await getContentForBox(uuid))
+    socket.on('stock_creation',async (id: string) => {
+        currentBoxes.push(await getContentForBox(id))
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         socket.to(socket.id).emit("stocks",stocks)
     });
@@ -88,22 +89,24 @@ serverSocket.on('connection', (socket) => {
         socket.to(socket.id).emit("stocks",stocks)
     });
 
-    socket.on('create_request', async (request: RequestClass) => {
-        await createRequest(request).then((resolve) => {
+    socket.on('create_request', async (id: string, oldOwner: string,requester:string) => {
+        await createRequest(id,oldOwner,requester).then((resolve) => {
             socket.to(socket.id).emit("create_request_fulfilled", resolve)
         }).catch((error) => {
             socket.to(socket.id).emit("create_request_rejected", error)
         })
+        //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         socket.to(socket.id).emit("stocks",stocks)
     });
 
-    socket.on('delete_request',async (request: RequestClass) => {
-        await createRequest(request).then((resolve) => {
+    socket.on('delete_request',async (id: string) => {
+        await deleteRequest(id).then((resolve) => {
             socket.to(socket.id).emit("delete_request_fulfilled", resolve)
         }).catch((error) => {
             socket.to(socket.id).emit("delete_request_rejected", error)
         })
+        //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         socket.to(socket.id).emit("stocks",stocks)
     });

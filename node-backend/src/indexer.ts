@@ -40,12 +40,12 @@ export async function getContentForAllBoxes(boxNames: Uint8Array[]){
 }
 
 /* Done multiple times whenever a box is crated / modified */
-export async function getContentForBox(boxName: Uint8Array) {
+export async function getContentForBox(id: string) {
     if (indexerClient === undefined) {
         indexerClient = createIndexerClient();
     }
     
-    const result = await indexerClient.lookupApplicationBoxByIDandName(appID, boxName).do();
+    const result = await indexerClient.lookupApplicationBoxByIDandName(appID, encodeBoxName(id)).do();
     const addresses = decodeBoxData(result.value);
     return new Box(decodeBoxName(result.name), addresses[0], addresses[1]);
 }
@@ -57,8 +57,7 @@ export async function updateBoxesWithChangedBox(id: string){
     
     const idx = currentBoxes.findIndex(box => {return box.id === id})
     currentBoxes.splice(idx,1)
-    const encodedID = encodeBoxName(id)
-    currentBoxes.push(await getContentForBox(encodedID))
+    currentBoxes.push(await getContentForBox(id))
 }
 
 /* Done multiple times whenever a QR-Code is scanned*/

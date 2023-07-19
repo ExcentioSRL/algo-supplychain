@@ -1,4 +1,4 @@
-import {Status,Stock} from "../types.js"
+import {Status,Stock, walletAddress} from "../types.js"
 import { currentBoxes } from "../server.js";
 import { fromBoxToStock, filterBoxes } from "./helper_boxes.js";
 import { getRequestsByWallet } from "./helper_requests.js";
@@ -22,7 +22,7 @@ export function removeDuplicates(array: Stock[]) {
     return risultato;
 }
 
-export async function getStocksByOwner(ownerWallet: string): Promise<Stock[]> {
+export async function getStocksByOwner(ownerWallet: walletAddress): Promise<Stock[]> {
     const filteredBoxes = currentBoxes.filter(box => {
         return box.owner == ownerWallet
     })
