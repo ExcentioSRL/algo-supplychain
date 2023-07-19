@@ -1,4 +1,4 @@
-import {Status,Box,Stock,UserData,RequestClass, partitaIVA} from "../types.js"
+import {Status,Box,Stock,UserData,RequestClass, partitaIVA, walletAddress} from "../types.js"
 import { UserModel } from "../database.js";
 import * as sdk from "algosdk"
 import { getNameFromAddress } from "./helper_users.js";
@@ -56,8 +56,8 @@ export function encodeBoxName(id: string){
     return encodedData
 }
 
-export async function searchStocksByPartialID(data: string): Promise<Stock[]>{
-    const fiteredBoxes : Box[] = currentBoxes.filter(box => { return box.id.includes(data)})
+export async function searchStocksByPartialID(data: string,walletAddress: walletAddress): Promise<Stock[]>{
+    const fiteredBoxes: Box[] = currentBoxes.filter(box => { return box.id.includes(data) && box.owner !== walletAddress})
     const filteredStocks : Stock[] = await Promise.all(fiteredBoxes.map(box => fromBoxToStock(box,Status.owned)) )
     return filteredStocks
 }

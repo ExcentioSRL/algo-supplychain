@@ -117,13 +117,13 @@ serverSocket.on('connection', (socket) => {
         callback(stocks)
     });
 
-    socket.on('search_stocks', async(data: string,callback) => {
+    socket.on('search_stocks', async(data: string,walletAddress: walletAddress,callback) => {
         let stocks: Stock[] = []
         /*const matches = await searchPIVAorName(data)
         for(let i=0;i<matches.length;i++){
             stocks.concat(await getStocksByOwner(matches[i]))
         }*/
-        stocks = stocks.concat(await searchStocksByPartialID(data))
+        stocks = stocks.concat(await searchStocksByPartialID(data,walletAddress))
         stocks = removeRequestsFromStocks(stocks)
         callback(stocks)
     })
