@@ -22,3 +22,18 @@ export async function getPIVAfromName(name: string){
     const owner: partitaIVA = userData[0].nomeAzienda!
     return owner
 }
+
+export async function searchPIVAorName(data:string) : Promise<walletAddress[]>{
+    let matches : Array<walletAddress> =[]
+    const regexPattern = new RegExp(data,"i")
+    const usersData : UserData[] = await UserModel.find({ nomeAzienda: regexPattern})
+    if(usersData !== undefined){
+        for (let i = 0; i < UserData.length; i++) {
+            if (usersData[i].walletAddress !== undefined) {
+                matches.push(usersData[i].walletAddress!)
+            }
+
+        }
+    }
+    return matches
+}

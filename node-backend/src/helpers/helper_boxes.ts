@@ -2,6 +2,7 @@ import {Status,Box,Stock,UserData,RequestClass, partitaIVA} from "../types.js"
 import { UserModel } from "../database.js";
 import * as sdk from "algosdk"
 import { getNameFromAddress } from "./helper_users.js";
+import { currentBoxes } from "../server.js";
 
 export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:partitaIVA){
     const producer : string = await getNameFromAddress(box.producer)
@@ -53,4 +54,10 @@ export function decodeBoxName(data: Uint8Array){
 export function encodeBoxName(id: string){
     const encodedData = new TextEncoder().encode(id)
     return encodedData
+}
+
+export async function searchStocksByPartialID(data: string): Promise<Stock[]>{
+    const fiteredBoxes : Box[] = currentBoxes.filter(box => { return box.id.includes(data)})
+    const filteredStocks : Stock[] = await Promise.all(fiteredBoxes.map(box => fromBoxToStock(box,Status.owned)) )
+    return filteredStocks
 }

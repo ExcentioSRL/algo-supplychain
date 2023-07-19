@@ -9,9 +9,11 @@ import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
 import {getBoxesNames,getContentForAllBoxes, getContentForBox} from "./indexer.js";
 import { Box, RequestClass, Stock, walletAddress } from './types.js';
-import { getStocksByOwner } from './helpers/helper_stocks.js';
+import { getStocksByOwner, removeDuplicates, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
 import { createRequest, deleteRequest } from './helpers/helper_requests.js';
+import { searchPIVAorName } from './helpers/helper_users.js';
+import { searchStocksByPartialID } from './helpers/helper_boxes.js';
 
 
 dotenv.config();
@@ -114,4 +116,15 @@ serverSocket.on('connection', (socket) => {
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         callback(stocks)
     });
+
+    socket.on('search_stocks', async(data: string,callback) => {
+        let stocks: Stock[] = []
+        /*const matches = await searchPIVAorName(data)
+        for(let i=0;i<matches.length;i++){
+            stocks.concat(await getStocksByOwner(matches[i]))
+        }*/
+        stocks = stocks.concat(await searchStocksByPartialID(data))
+        stocks = removeRequestsFromStocks(stocks)
+        callback(stocks)
+    })
 });

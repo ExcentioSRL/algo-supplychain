@@ -34,3 +34,17 @@ export async function getStocksByOwner(ownerWallet: walletAddress): Promise<Stoc
     return removeDuplicates(result)
 }
 
+export function removeRequestsFromStocks(stocks: Stock[]) : Stock[]{
+    let temporaryStocks: Stock[] = stocks.filter(stock => { return stock.status !== Status.requested })
+    temporaryStocks = temporaryStocks.map(stock => changeRequestedbyToUnavailable(stock))
+    return temporaryStocks
+}
+
+
+export function changeRequestedbyToUnavailable(stock : Stock) : Stock{
+    if(stock.status === Status.requested_by){
+        return new Stock(stock.id,stock.producer,Status.unavailable,undefined,stock.owner)
+    }else{
+        return stock
+    }
+}
