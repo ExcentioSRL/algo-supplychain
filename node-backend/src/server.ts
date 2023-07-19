@@ -30,7 +30,11 @@ const SOCKET_PORT = process.env.SOCKET_PORT;
 
 export const app : Express = express();
 const server = http.createServer(app); 
-const serverSocket = new io.Server(server);
+const serverSocket = new io.Server(server,{
+    cors: {
+        origin: "http://localhost:5173"
+    }
+});
 let sockets = new Map<string,string>();
 
 app.use(session({
@@ -67,29 +71,29 @@ app.listen(ENDPOINTS_PORT, () => {
 /* --- rimuovere socket ID e usare i cookie? */
 serverSocket.on('connection', (socket) => {
 
-    socket.on('wallet_login',async (wallet: walletAddress) => {
+    socket.on('wallet_login',async (wallet: walletAddress,callback) => {
         sockets.set(socket.id, wallet)
         const stocks : Stock[] = await getStocksByOwner(wallet)
-        socket.to(socket.id).emit("stocks",stocks)
+        callback(stocks)
     });
 
     socket.on('wallet_logout', async() => {
         sockets.delete(socket.id)
     })
 
-    socket.on('stock_creation',async (id: string) => {
+    socket.on('stock_creation',async (id: string, callback) => {
         currentBoxes.push(await getContentForBox(id))
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.to(socket.id).emit("stocks",stocks)
+        callback(stocks)
     });
 
-    socket.on('stock_change_ownership', async (id : string) => {
+    socket.on('stock_change_ownership', async (id : string,callback) => {
         await updateBoxesWithChangedBox(id)
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.to(socket.id).emit("stocks",stocks)
+        callback(stocks)
     });
 
-    socket.on('create_request', async (id: string, oldOwner: string,requester:string) => {
+    socket.on('create_request', async (id: string, oldOwner: string,requester:string,callback) => {
         await createRequest(id,oldOwner,requester).then((resolve) => {
             socket.to(socket.id).emit("create_request_fulfilled", resolve)
         }).catch((error) => {
@@ -97,10 +101,10 @@ serverSocket.on('connection', (socket) => {
         })
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.to(socket.id).emit("stocks",stocks)
+        callback(stocks)
     });
 
-    socket.on('delete_request',async (id: string) => {
+    socket.on('delete_request',async (id: string,callback) => {
         await deleteRequest(id).then((resolve) => {
             socket.to(socket.id).emit("delete_request_fulfilled", resolve)
         }).catch((error) => {
@@ -108,6 +112,6 @@ serverSocket.on('connection', (socket) => {
         })
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        socket.to(socket.id).emit("stocks",stocks)
+        callback(stocks)
     });
 });

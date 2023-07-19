@@ -1,16 +1,16 @@
-import * as sdk from 'algosdk';
+import pkg from 'algosdk';
 import dotenv from 'dotenv';
 import { Box } from './types.js';
 import { encodeBoxName, decodeBoxData,decodeBoxName } from './helpers/helper_boxes.js';
 import { currentBoxes } from './server.js';
 
+const {Indexer} = pkg
 dotenv.config()
-
-let indexerClient: sdk.Indexer;
+let indexerClient: any;
 let appID = parseInt(process.env.APP_ID!);
 
 function createIndexerClient(){
-    return new sdk.Indexer('', 'https://testnet-idx.algonode.cloud', '')
+    return new pkg.Indexer('', 'https://testnet-idx.algonode.cloud', '')
 }
 
 /* Done once on start */
