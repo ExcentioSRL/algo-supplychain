@@ -75,7 +75,7 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('get_stocks',async(callback) => {
         const stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        return stocks;
+        callback(stocks);
     });
 
     socket.on('wallet_login',async (wallet: walletAddress,callback) => {
