@@ -73,6 +73,11 @@ app.listen(ENDPOINTS_PORT, () => {
 /* --- rimuovere socket ID e usare i cookie? */
 serverSocket.on('connection', (socket) => {
 
+    socket.on('get_stocks',async(callback) => {
+        const stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        return stocks;
+    });
+
     socket.on('wallet_login',async (wallet: walletAddress,callback) => {
         sockets.set(socket.id, wallet)
         const stocks : Stock[] = await getStocksByOwner(wallet)

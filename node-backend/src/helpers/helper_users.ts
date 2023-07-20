@@ -23,6 +23,12 @@ export async function getPIVAfromName(name: string){
     return owner
 }
 
+export async function getNameFromPIVA(partitaIVA: partitaIVA){
+    const userData : UserData[] = await UserModel.find({partitaIVA: partitaIVA})
+    const name: string = userData[0].nomeAzienda!
+    return name
+}
+
 export async function searchPIVAorName(data:string) : Promise<walletAddress[]>{
     let matches : Array<walletAddress> =[]
     const regexPattern = new RegExp(data,"i")

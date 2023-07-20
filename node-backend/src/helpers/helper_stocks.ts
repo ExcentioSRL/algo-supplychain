@@ -40,10 +40,9 @@ export function removeRequestsFromStocks(stocks: Stock[]) : Stock[]{
     return temporaryStocks
 }
 
-
 export function changeRequestedbyToUnavailable(stock : Stock) : Stock{
     if(stock.status === Status.requested_by){
-        return new Stock(stock.id,stock.producer,Status.unavailable,undefined,stock.owner)
+        return new Stock(stock.id,stock.producer,Status.unavailable,stock.owner,undefined)
     }else{
         return stock
     }

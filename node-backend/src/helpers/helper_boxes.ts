@@ -1,10 +1,9 @@
-import {Status,Box,Stock,UserData,RequestClass, partitaIVA, walletAddress} from "../types.js"
-import { UserModel } from "../database.js";
+import {Status,Box,Stock,RequestClass, walletAddress, StockRequest} from "../types.js"
 import * as sdk from "algosdk"
-import { getNameFromAddress } from "./helper_users.js";
+import { getNameFromAddress, getNameFromPIVA } from "./helper_users.js";
 import { currentBoxes } from "../server.js";
 
-export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:partitaIVA){
+export async function fromBoxToStock(box: Box,status: Status, request?: RequestClass){
     const producer : string = await getNameFromAddress(box.producer)
     let owner : string;
     if(box.producer === box.owner){
@@ -13,12 +12,12 @@ export async function fromBoxToStock(box: Box,status: Status, requesterPIVA?:par
         owner = await getNameFromAddress(box.owner)
     }
     
-    if(status === Status.requested_by){
-        const requesterData: UserData[] = await UserModel.find({ partitaIVA: requesterPIVA })
-        const requester = requesterData[0].nomeAzienda!
-        return new Stock(box.id, producer, status, requester, owner)
+    if(status === Status.requested_by || status === Status.requested){
+        const oldOwner: string = await getNameFromPIVA(request?.oldOwner!);
+        const requester: string = await getNameFromPIVA(request?.requester!);
+        return new Stock(box.id, producer, status, owner, new StockRequest(oldOwner, requester,request?.isApproved!))
     }else{
-        return new Stock(box.id, producer, status, undefined, owner)
+        return new Stock(box.id, producer, status, owner,undefined)
     }
 }
 
@@ -29,9 +28,9 @@ export async function filterBoxes(boxes: Box[], requests: RequestClass[], areMyR
             if (requests[i].id == boxes[j].id) {
                 let stock: Stock;
                 if (areMyRequests === true) {
-                    stock = await fromBoxToStock(boxes[j], Status.requested);
+                    stock = await fromBoxToStock(boxes[j], Status.requested,requests[i]);
                 } else {
-                    stock = await fromBoxToStock(boxes[j], Status.requested_by, requests[i].requester);
+                    stock = await fromBoxToStock(boxes[j], Status.requested_by,requests[i]);
                 }
                 risultato.push(stock);
             }

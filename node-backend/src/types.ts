@@ -13,15 +13,27 @@ export class Stock{
     id: string;
     producer: string;
     status: Status;
-    requester?: string;
-    owner?: string;
+    owner: string;
+    request?: StockRequest;
 
-    constructor(id: string, producer: string, status: Status, requester?: string, owner?:string){
+    constructor(id: string, producer: string, status: Status, owner: string, request?: StockRequest){
         this.id = id
         this.producer = producer
         this.status = status
-        this.requester = requester
         this.owner = owner
+        this.request = request
+    }
+}
+
+export class StockRequest{
+    oldOwner: string; //nome azienda
+    requester: string; //nome azienda
+    isApproved: boolean;
+
+    constructor(oldOwner: string,requester: string, isApproved: boolean){
+        this.oldOwner = oldOwner;
+        this.requester = requester;
+        this.isApproved = isApproved;
     }
 }
 
@@ -58,11 +70,12 @@ export class RequestClass{
     id: string;
     oldOwner: partitaIVA;
     requester: partitaIVA;
+    isApproved: boolean;
 
-    constructor(id: string,oldOwner: string, requester: string){
+    constructor(id: string,oldOwner: string, requester: string,isApproved: boolean){
         this.id = id
         this.oldOwner = oldOwner
         this.requester = requester
+        this.isApproved = isApproved
     }
 }
-
