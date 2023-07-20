@@ -1,6 +1,7 @@
 import express,{Request,Response} from "express"
 import {UserModel} from '../database.js';
 import {authenticate} from '../auth.js';
+import { UserData, partitaIVA } from "../types.js";
 
 export let router = express.Router();
 
@@ -11,13 +12,16 @@ router.get('/login',async (req: Request,res : Response) => {
         return res.json({error:"Missing credentials"});
     }
     try{
-        const result = await UserModel.findOne({email,password});
+        const result : UserData[] = await UserModel.find({email:email,password:password});
         if(result === null){
             res.status(401);
             return res.json({result: "Wrong credentials"});
         }else{
+            const pIVA : partitaIVA = result[0].partitaIVA!
+            const nomeAzienda : string = result[0].nomeAzienda!
+            console.log()
             //req.session.userId = email
-            return res.status(200).json(result);
+            return res.status(200).json({pIva: pIVA, nomeAzienda: nomeAzienda});
         }
     }catch (error){
         res.status(500);

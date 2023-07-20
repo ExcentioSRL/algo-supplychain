@@ -96,11 +96,7 @@ serverSocket.on('connection', (socket) => {
     });
 
     socket.on('create_request', async (id: string, oldOwner: string,requester:string,callback) => {
-        await createRequest(id,oldOwner,requester).then((resolve) => {
-            socket.to(socket.id).emit("create_request_fulfilled", resolve)
-        }).catch((error) => {
-            socket.to(socket.id).emit("create_request_rejected", error)
-        })
+        await createRequest(id,oldOwner,requester)
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         callback(stocks)
@@ -108,10 +104,7 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('delete_request',async (id: string,callback) => {
         await deleteRequest(id).then((resolve) => {
-            socket.to(socket.id).emit("delete_request_fulfilled", resolve)
-        }).catch((error) => {
-            socket.to(socket.id).emit("delete_request_rejected", error)
-        })
+        }).catch((error) => {})
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         callback(stocks)

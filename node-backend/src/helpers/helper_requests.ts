@@ -1,5 +1,5 @@
 import { RequestModel } from "../database.js";
-import { RequestClass } from "../types.js";
+import { RequestClass, partitaIVA } from "../types.js";
 import { getPIVAfromAddress, getPIVAfromName } from "./helper_users.js";
 
 
@@ -13,23 +13,27 @@ export async function getRequestsByWallet(wallet: string): Promise<RequestClass[
     return [othersRequests, myRequests];
 }
 
-export async function createRequest(id: string,oldOwner: string, requester: string): Promise<string> {
+export async function createRequest(uuid: string,oldOwner: string, requester: string){
     try{
-        if(!checkRequest(id,oldOwner,requester)){
-            return Promise.reject("An invalid request was provided");
+        if (!checkRequest(uuid,oldOwner,requester)){
+            console.log("An invalid request was provided");
+            return ;
         }
-        const result = await RequestModel.findOne({id});
-        if(result !== null){
-            return Promise.reject("The provided requests already exist");
+        const result = await RequestModel.find({ id: uuid });
+        console.log("RESULT: " + result[0])
+        if(result !== undefined){
+            console.log("The provided requests already exist");
         }else{
-            const oldOwnerPIVA = await getPIVAfromName(oldOwner)
-            const requesterPIVA = await getPIVAfromName(requester)
-            const newRequest = new RequestModel({ id, oldOwnerPIVA, requesterPIVA});
+            const oldOwnerPIVA: partitaIVA = await getPIVAfromName(oldOwner)
+            const requesterPIVA: partitaIVA = await getPIVAfromName(requester)
+            console.log("oldOwnerPIVA: " + oldOwnerPIVA + " requesterPIVA: " + requesterPIVA)
+            const newRequest = new RequestModel({ id: uuid,oldOwner: oldOwnerPIVA,requester: requesterPIVA});
             const response  = await newRequest.save();
+            console.log("siamo qui: " + response)
             return Promise.resolve("Request deleted correctly");
         }
     }catch(error){
-        return Promise.reject("Internal server error");
+        console.log("Internal server error");
     } 
 }
 
