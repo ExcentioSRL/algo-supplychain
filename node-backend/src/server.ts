@@ -97,14 +97,16 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('create_request', async (id: string, oldOwner: string,requester:string,callback) => {
         await createRequest(id,oldOwner,requester)
+        console.log("wallet: " + sockets.get(socket.id))
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         callback(stocks)
     });
 
     socket.on('delete_request',async (id: string,callback) => {
-        await deleteRequest(id).then((resolve) => {
+        deleteRequest(id).then((resolve) => {
         }).catch((error) => {})
+ 
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         callback(stocks)

@@ -19,7 +19,7 @@ export async function getPIVAfromAddress(walletAddress: walletAddress){
 
 export async function getPIVAfromName(name: string){
     const userData: UserData[] = await UserModel.find({ nomeAzienda: name })
-    const owner: partitaIVA = userData[0].nomeAzienda!
+    const owner: partitaIVA = userData[0].partitaIVA!
     return owner
 }
 
