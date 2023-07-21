@@ -2,6 +2,7 @@ import {Status,Stock, walletAddress} from "../types.js"
 import { currentBoxes } from "../server.js";
 import { fromBoxToStock, filterBoxes } from "./helper_boxes.js";
 import { getRequestsByWallet } from "./helper_requests.js";
+import { getNameFromAddress } from "./helper_users.js";
 
 export function removeDuplicates(array: Stock[]) {
     const set = new Set();
@@ -46,4 +47,21 @@ export function changeRequestedbyToUnavailable(stock : Stock) : Stock{
     }else{
         return stock
     }
+}
+
+export async function removeRequestedByStocksApproved(stocks: Stock[],walletAddress:walletAddress){
+
+    const name = await getNameFromAddress(walletAddress)
+
+    return stocks.filter(stock => {
+        if (stock.status !== Status.requested_by) {
+            return true;
+        } else {
+            if (stock.request?.isApproved === true && stock.request.oldOwner === name) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    })
 }

@@ -26,7 +26,7 @@ export async function createRequest(uuid: string,oldOwner: string, requester: pa
             console.log("The provided requests already exist");
         }else{
             const oldOwnerPIVA: partitaIVA = await getPIVAfromName(oldOwner)
-            const newRequest = new RequestModel({ id: uuid,oldOwner: oldOwnerPIVA,requester: requester});
+            const newRequest = new RequestModel({ id: uuid,oldOwner: oldOwnerPIVA,requester: requester, isApproved: false});
             const response  = await newRequest.save();
             return ;
         }
@@ -35,17 +35,29 @@ export async function createRequest(uuid: string,oldOwner: string, requester: pa
     } 
 }
 
-export async function deleteRequest(id: string) : Promise<string>{
+export async function approveRequest(id: string){
     try{
-        const result = await RequestModel.findOne({id});
-        if(result === null){
-            return Promise.reject("The provided requests doesn't exist");
+        const result : RequestClass[] = await RequestModel.find({id: id});
+        if(result[0] === undefined){
+            console.log("The provided requests doesn't exist");
         }else{
-            await RequestModel.deleteOne({id});
-            return Promise.resolve("Request deleted correctly");
+            await RequestModel.findOneAndUpdate({id: id},{isApproved: true});
         }
     }catch(error){
-        return Promise.reject("Internal server error");
+        console.log("Internal server error " + error);
+    }
+}
+
+export async function deleteRequest(id: string){
+    try{
+        const result : RequestClass[] = await RequestModel.find({id:id})
+        if(result[0] === undefined){
+            console.log("The provided requests doesn't exist");
+        }else{
+            await RequestModel.deleteOne({id:id})
+        }
+    }catch(error){
+        console.log("Internal server error " + error);
     }
 }
 

@@ -16,7 +16,8 @@ export const UserModel = model('User',userSchema)
 const requestSchema = new Schema({
     id: String,
     oldOwner: String, //pIVA
-    requester: String //pIVA
+    requester: String, //pIVA
+    isApproved: Boolean
 })
 export const RequestModel = model('Request',requestSchema)
 

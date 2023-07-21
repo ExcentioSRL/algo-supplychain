@@ -28,7 +28,7 @@ def add_stock(uuid: abi.String, creator: abi.Address) -> Expr:
         app.state.stocks[uuid.get()].set(new_stock),
 
     )
-
+@app.external
 def delete_stock(uuid: abi.String) -> Expr:
     return Seq(
         Assert(app.state.stocks[uuid.get()].exists()),

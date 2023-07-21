@@ -8,11 +8,10 @@ import * as io from "socket.io";
 import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
 import {getBoxesNames,getContentForAllBoxes, getContentForBox} from "./indexer.js";
-import { Box, RequestClass, Stock, walletAddress } from './types.js';
-import { getStocksByOwner, removeDuplicates, removeRequestsFromStocks } from './helpers/helper_stocks.js';
+import { Box, Stock, walletAddress } from './types.js';
+import { getStocksByOwner, removeRequestedByStocksApproved, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
-import { createRequest, deleteRequest } from './helpers/helper_requests.js';
-import { searchPIVAorName } from './helpers/helper_users.js';
+import { approveRequest, createRequest, deleteRequest } from './helpers/helper_requests.js';
 import { searchStocksByPartialID } from './helpers/helper_boxes.js';
 
 
@@ -74,13 +73,15 @@ app.listen(ENDPOINTS_PORT, () => {
 serverSocket.on('connection', (socket) => {
 
     socket.on('get_stocks',async(callback) => {
-        const stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks);
     });
 
     socket.on('wallet_login',async (wallet: walletAddress,callback) => {
         sockets.set(socket.id, wallet)
-        const stocks : Stock[] = await getStocksByOwner(wallet)
+        let stocks : Stock[] = await getStocksByOwner(wallet)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -90,32 +91,41 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('stock_creation',async (id: string, callback) => {
         currentBoxes.push(await getContentForBox(id))
-        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
     socket.on('stock_change_ownership', async (id : string,callback) => {
         await updateBoxesWithChangedBox(id)
-        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
     socket.on('create_request', async (id: string, oldOwner: string,requester:string,callback) => {
         await createRequest(id,oldOwner,requester)
-        console.log("wallet: " + sockets.get(socket.id))
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
-        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
     socket.on('delete_request',async (id: string,callback) => {
-        deleteRequest(id).then((resolve) => {
-        }).catch((error) => {})
- 
+        await deleteRequest(id)
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
-        const stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
+
+    socket.on('approve_request',async(id:string,callback) => {
+        await approveRequest(id)
+        //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
+        let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks,sockets.get(socket.id)!)
+        callback(stocks)
+    })
 
     socket.on('search_stocks', async(data: string,walletAddress: walletAddress,callback) => {
         let stocks: Stock[] = []

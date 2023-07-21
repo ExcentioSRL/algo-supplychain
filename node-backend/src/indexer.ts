@@ -56,8 +56,13 @@ export async function updateBoxesWithChangedBox(id: string){
     }
     
     const idx = currentBoxes.findIndex(box => {return box.id === id})
-    currentBoxes.splice(idx,1)
-    currentBoxes.push(await getContentForBox(id))
+    if(idx === -1){
+        console.log("QUIII")
+    }else{
+        currentBoxes.splice(idx, 1)
+        currentBoxes.push(await getContentForBox(id))
+    }
+    
 }
 
 /* Done multiple times whenever a QR-Code is scanned*/
