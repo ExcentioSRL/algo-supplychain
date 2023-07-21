@@ -28,12 +28,15 @@ def add_stock(uuid: abi.String, creator: abi.Address) -> Expr:
         app.state.stocks[uuid.get()].set(new_stock),
 
     )
+"""
 @app.external
 def delete_stock(uuid: abi.String) -> Expr:
     return Seq(
         Assert(app.state.stocks[uuid.get()].exists()),
         app.state.stocks[uuid.get()].delete(),
     )
+"""
+
 
 @app.external
 def change_owner(uuid: abi.String,new_owner:abi.Address) -> Expr:
@@ -41,6 +44,7 @@ def change_owner(uuid: abi.String,new_owner:abi.Address) -> Expr:
         #come controllo che questa funzione possa essere invocata solo se possiedo il lotto?
         #chiedere una transazione, come alla creazione, per mantere il minimum balance e restituire i fondi al creatore?
         Assert(app.state.stocks[uuid.get()].exists()),
+        #app.state.stocks[uuid.get()].store_into(stock := Stock())
         (stock := Stock()).decode(app.state.stocks[uuid.get()].get()),
         (creator := abi.Address()).set(stock.creator),
         (owner := abi.Address()).set(stock.owner),

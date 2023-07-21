@@ -98,6 +98,7 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('stock_change_ownership', async (id : string,callback) => {
         await updateBoxesWithChangedBox(id)
+        await deleteRequest(id)
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)

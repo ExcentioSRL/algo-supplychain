@@ -47,7 +47,7 @@ export async function getContentForBox(id: string) {
     
     const result = await indexerClient.lookupApplicationBoxByIDandName(appID, encodeBoxName(id)).do();
     const addresses = decodeBoxData(result.value);
-    return new Box(decodeBoxName(result.name), addresses[0], addresses[1]);
+    return new Box(decodeBoxName(result.name), addresses[1], addresses[0]);
 }
 
 export async function updateBoxesWithChangedBox(id: string){
@@ -57,7 +57,7 @@ export async function updateBoxesWithChangedBox(id: string){
     
     const idx = currentBoxes.findIndex(box => {return box.id === id})
     if(idx === -1){
-        console.log("QUIII")
+        console.log("Box not found")
     }else{
         currentBoxes.splice(idx, 1)
         currentBoxes.push(await getContentForBox(id))
