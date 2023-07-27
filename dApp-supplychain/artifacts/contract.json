@@ -5,6 +5,10 @@
             "name": "add_stock",
             "args": [
                 {
+                    "type": "pay",
+                    "name": "payment"
+                },
+                {
                     "type": "string",
                     "name": "uuid"
                 },
@@ -32,6 +36,10 @@
         {
             "name": "change_owner",
             "args": [
+                {
+                    "type": "pay",
+                    "name": "payment"
+                },
                 {
                     "type": "string",
                     "name": "uuid"

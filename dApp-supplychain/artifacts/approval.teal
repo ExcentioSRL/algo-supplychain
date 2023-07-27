@@ -1,12 +1,12 @@
 #pragma version 8
-intcblock 0 1
+intcblock 0 1 34100
 bytecblock 0x
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l8
 txna ApplicationArgs 0
-pushbytes 0x97bc0adf // "add_stock(string,address)void"
+pushbytes 0x46a5d530 // "add_stock(pay,string,address)void"
 ==
 bnz main_l7
 txna ApplicationArgs 0
@@ -14,7 +14,7 @@ pushbytes 0x855224d5 // "delete_stock(string)void"
 ==
 bnz main_l6
 txna ApplicationArgs 0
-pushbytes 0xe2c7f090 // "change_owner(string,address)void"
+pushbytes 0xa81f1155 // "change_owner(pay,string,address)void"
 ==
 bnz main_l5
 err
@@ -27,7 +27,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub changeownercaster_7
+callsub changeownercaster_8
 intc_1 // 1
 return
 main_l6:
@@ -39,7 +39,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub deletestockcaster_6
+callsub deletestockcaster_7
 intc_1 // 1
 return
 main_l7:
@@ -51,24 +51,28 @@ intc_0 // 0
 !=
 &&
 assert
-callsub addstockcaster_5
+callsub addstockcaster_6
 intc_1 // 1
 return
 main_l8:
 txn OnCompletion
 intc_0 // NoOp
 ==
-bnz main_l14
+bnz main_l16
 txn OnCompletion
 intc_1 // OptIn
 ==
-bnz main_l13
+bnz main_l15
+txn OnCompletion
+pushint 4 // UpdateApplication
+==
+bnz main_l14
 txn OnCompletion
 pushint 5 // DeleteApplication
 ==
-bnz main_l12
+bnz main_l13
 err
-main_l12:
+main_l13:
 txn ApplicationID
 intc_0 // 0
 !=
@@ -76,7 +80,15 @@ assert
 callsub delete_4
 intc_1 // 1
 return
-main_l13:
+main_l14:
+txn ApplicationID
+intc_0 // 0
+!=
+assert
+callsub update_5
+intc_1 // 1
+return
+main_l15:
 txn ApplicationID
 intc_0 // 0
 !=
@@ -84,7 +96,7 @@ assert
 callsub optin_0
 intc_1 // 1
 return
-main_l14:
+main_l16:
 txn ApplicationID
 intc_0 // 0
 ==
@@ -99,12 +111,22 @@ retsub
 
 // add_stock
 addstock_1:
-proto 2 0
+proto 3 0
 bytec_0 // ""
 intc_0 // 0
 dup
 bytec_0 // ""
 dup
+frame_dig -3
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -3
+gtxns Amount
+intc_2 // 34100
+>=
+assert
 frame_dig -2
 extract 2 0
 box_len
@@ -130,8 +152,9 @@ retsub
 // delete_stock
 deletestock_2:
 proto 1 0
+bytec_0 // ""
+dup
 frame_dig -1
-extract 2 0
 box_len
 store 3
 store 2
@@ -139,34 +162,63 @@ load 3
 assert
 frame_dig -1
 extract 2 0
+box_get
+store 5
+store 4
+load 5
+assert
+load 4
+frame_bury 0
+frame_dig 0
+extract 0 32
+frame_bury 1
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+intc_2 // 34100
+itxn_field Amount
+frame_dig 1
+itxn_field Receiver
+itxn_submit
+frame_dig -1
 box_del
 pop
 retsub
 
 // change_owner
 changeowner_3:
-proto 2 0
+proto 3 0
 bytec_0 // ""
 dupn 2
 intc_0 // 0
 dup
 bytec_0 // ""
 dup
-frame_dig -2
-extract 2 0
-box_len
-store 5
-store 4
-load 5
+frame_dig -3
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -3
+gtxns Amount
+intc_2 // 34100
+>=
 assert
 frame_dig -2
 extract 2 0
-box_get
+box_len
 store 7
 store 6
 load 7
 assert
-load 6
+frame_dig -2
+extract 2 0
+box_get
+store 9
+store 8
+load 9
+assert
+load 8
 frame_bury 0
 frame_dig 0
 extract 32 0
@@ -174,6 +226,14 @@ frame_bury 1
 frame_dig 0
 extract 0 32
 frame_bury 2
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+intc_2 // 34100
+itxn_field Amount
+frame_dig 2
+itxn_field Receiver
+itxn_submit
 frame_dig -1
 frame_bury 2
 frame_dig 2
@@ -201,22 +261,44 @@ assert
 intc_1 // 1
 return
 
-// add_stock_caster
-addstockcaster_5:
+// update
+update_5:
 proto 0 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+intc_1 // 1
+return
+
+// add_stock_caster
+addstockcaster_6:
+proto 0 0
+intc_0 // 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
-frame_bury 0
-txna ApplicationArgs 2
 frame_bury 1
+txna ApplicationArgs 2
+frame_bury 2
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 0
+frame_dig 0
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
 frame_dig 0
 frame_dig 1
+frame_dig 2
 callsub addstock_1
 retsub
 
 // delete_stock_caster
-deletestockcaster_6:
+deletestockcaster_7:
 proto 0 0
 bytec_0 // ""
 txna ApplicationArgs 1
@@ -226,15 +308,26 @@ callsub deletestock_2
 retsub
 
 // change_owner_caster
-changeownercaster_7:
+changeownercaster_8:
 proto 0 0
+intc_0 // 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
-frame_bury 0
-txna ApplicationArgs 2
 frame_bury 1
+txna ApplicationArgs 2
+frame_bury 2
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 0
+frame_dig 0
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
 frame_dig 0
 frame_dig 1
+frame_dig 2
 callsub changeowner_3
 retsub

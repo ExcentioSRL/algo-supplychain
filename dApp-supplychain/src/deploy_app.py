@@ -1,7 +1,7 @@
 import base64
 
 from algosdk import transaction, v2client
-from utils import get_account_data
+from utils import get_account_data,write_file
 
 if __name__== "__main__":
     address,private_key = get_account_data("mnemonic_keys/mnemonic_key_deploy_account.txt")
@@ -43,7 +43,7 @@ if __name__== "__main__":
     create_result = transaction.wait_for_confirmation(algod_client,create_txid,4)
     app_id = create_result["application-index"]
     print(f"Created app with id: {app_id}")
-
+    write_file("appID.txt",app_id)
     
     #scrivi nel file .env del backend
 
