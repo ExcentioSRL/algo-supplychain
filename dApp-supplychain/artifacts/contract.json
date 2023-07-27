@@ -5,7 +5,7 @@
             "name": "add_stock",
             "args": [
                 {
-                    "type": "uint64",
+                    "type": "string",
                     "name": "uuid"
                 },
                 {
@@ -18,22 +18,22 @@
             }
         },
         {
-            "name": "get_stock_by_uuid",
+            "name": "delete_stock",
             "args": [
                 {
-                    "type": "uint64",
+                    "type": "string",
                     "name": "uuid"
                 }
             ],
             "returns": {
-                "type": "(address,address)"
+                "type": "void"
             }
         },
         {
             "name": "change_owner",
             "args": [
                 {
-                    "type": "uint64",
+                    "type": "string",
                     "name": "uuid"
                 },
                 {

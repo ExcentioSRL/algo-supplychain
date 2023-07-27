@@ -6,15 +6,15 @@ intc_0 // 0
 ==
 bnz main_l8
 txna ApplicationArgs 0
-pushbytes 0x47f6ea19 // "add_stock(uint64,address)void"
+pushbytes 0x97bc0adf // "add_stock(string,address)void"
 ==
 bnz main_l7
 txna ApplicationArgs 0
-pushbytes 0x8726fec2 // "get_stock_by_uuid(uint64)(address,address)"
+pushbytes 0x855224d5 // "delete_stock(string)void"
 ==
 bnz main_l6
 txna ApplicationArgs 0
-pushbytes 0xe5a54d1b // "change_owner(uint64,address)void"
+pushbytes 0xe2c7f090 // "change_owner(string,address)void"
 ==
 bnz main_l5
 err
@@ -39,7 +39,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub getstockbyuuidcaster_6
+callsub deletestockcaster_6
 intc_1 // 1
 return
 main_l7:
@@ -106,7 +106,7 @@ dup
 bytec_0 // ""
 dup
 frame_dig -2
-itob
+extract 2 0
 box_len
 store 1
 store 0
@@ -118,28 +118,29 @@ frame_dig -1
 concat
 frame_bury 0
 frame_dig -2
-itob
+extract 2 0
 box_del
 pop
 frame_dig -2
-itob
+extract 2 0
 frame_dig 0
 box_put
 retsub
 
-// get_stock_by_uuid
-getstockbyuuid_2:
-proto 1 1
-bytec_0 // ""
+// delete_stock
+deletestock_2:
+proto 1 0
 frame_dig -1
-itob
-box_get
+extract 2 0
+box_len
 store 3
 store 2
 load 3
 assert
-load 2
-frame_bury 0
+frame_dig -1
+extract 2 0
+box_del
+pop
 retsub
 
 // change_owner
@@ -152,14 +153,14 @@ dup
 bytec_0 // ""
 dup
 frame_dig -2
-itob
+extract 2 0
 box_len
 store 5
 store 4
 load 5
 assert
 frame_dig -2
-itob
+extract 2 0
 box_get
 store 7
 store 6
@@ -180,11 +181,11 @@ frame_dig 1
 concat
 frame_bury 0
 frame_dig -2
-itob
+extract 2 0
 box_del
 pop
 frame_dig -2
-itob
+extract 2 0
 frame_dig 0
 box_put
 retsub
@@ -203,10 +204,9 @@ return
 // add_stock_caster
 addstockcaster_5:
 proto 0 0
-intc_0 // 0
 bytec_0 // ""
+dup
 txna ApplicationArgs 1
-btoi
 frame_bury 0
 txna ApplicationArgs 2
 frame_bury 1
@@ -215,30 +215,22 @@ frame_dig 1
 callsub addstock_1
 retsub
 
-// get_stock_by_uuid_caster
-getstockbyuuidcaster_6:
+// delete_stock_caster
+deletestockcaster_6:
 proto 0 0
 bytec_0 // ""
-intc_0 // 0
 txna ApplicationArgs 1
-btoi
-frame_bury 1
-frame_dig 1
-callsub getstockbyuuid_2
 frame_bury 0
-pushbytes 0x151f7c75 // 0x151f7c75
 frame_dig 0
-concat
-log
+callsub deletestock_2
 retsub
 
 // change_owner_caster
 changeownercaster_7:
 proto 0 0
-intc_0 // 0
 bytec_0 // ""
+dup
 txna ApplicationArgs 1
-btoi
 frame_bury 0
 txna ApplicationArgs 2
 frame_bury 1
