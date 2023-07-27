@@ -5,6 +5,7 @@ __pycache__/
 
 #removed the key
 src/mnemonic_keys/*
+/artifacts/*
 # C extensions
 *.so
 
