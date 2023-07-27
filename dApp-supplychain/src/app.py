@@ -1,5 +1,4 @@
 from beaker import *
-from beaker.consts import BOX_BYTE_MIN_BALANCE, BOX_FLAT_MIN_BALANCE
 from beaker.lib.storage import BoxMapping
 from pyteal import *
 

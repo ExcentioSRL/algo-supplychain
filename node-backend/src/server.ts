@@ -12,7 +12,7 @@ import { Box, Stock, walletAddress } from './types.js';
 import { getStocksByOwner, removeRequestedByStocksApproved, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
 import { approveRequest, createRequest, deleteRequest } from './helpers/helper_requests.js';
-import { searchBoxesByPartialID } from './helpers/helper_boxes.js';
+import { removeBox, searchBoxesByPartialID } from './helpers/helper_boxes.js';
 import { getNameFromAddress } from './helpers/helper_users.js';
 
 
@@ -104,6 +104,14 @@ serverSocket.on('connection', (socket) => {
         stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
+
+    socket.on('delete_stock',async (id:string,callback) => {
+        removeBox(id)
+        await deleteRequest(id)
+        let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
+        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
+        callback(stocks)
+    })
 
     socket.on('create_request', async (id: string, oldOwner: string,requester:string,callback) => {
         await createRequest(id,oldOwner,requester)

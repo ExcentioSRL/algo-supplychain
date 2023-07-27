@@ -60,3 +60,8 @@ export async function searchBoxesByPartialID(data: string,walletAddress: walletA
     const filteredStocks : Stock[] = await Promise.all(fiteredBoxes.map(box => fromBoxToStock(box,Status.owned)) )
     return filteredStocks
 }
+
+export function removeBox(id: string){
+    const idx = currentBoxes.findIndex(box => { return box.id === id })
+    currentBoxes.splice(idx,1)
+}
