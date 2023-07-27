@@ -10,10 +10,11 @@ export async function getNameFromAddress(walletAddress: walletAddress){
 
 export async function getPIVAfromAddress(walletAddress: walletAddress){
     const userData: UserData[] = await UserModel.find({ walletAddress: walletAddress })
-    if (userData[0].walletAddress === undefined) {
+    let partitaIVA: partitaIVA = "";
+    if (userData[0] === undefined) {
         console.log("No wallet associated with this account")
     }
-    const partitaIVA : partitaIVA = userData[0].partitaIVA!
+    partitaIVA = userData[0].partitaIVA!
     return partitaIVA
 }
 

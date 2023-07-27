@@ -1,8 +1,10 @@
 import pkg from 'algosdk';
 import dotenv from 'dotenv';
-import { Box } from './types.js';
+import { Box, walletAddress } from './types.js';
 import { encodeBoxName, decodeBoxData,decodeBoxName } from './helpers/helper_boxes.js';
 import { currentBoxes } from './server.js';
+
+
 
 const {Indexer} = pkg
 dotenv.config()
@@ -72,7 +74,13 @@ export async function getOwnersHistory(boxID: string) {
     }
 
     //getting all transactions with this box.id in the notes, since there is no way of searching for boxes in the transaction
-    const result= await indexerClient.searchForTransactions().txType("appl").applicationID(appID).notePrefix(encodeBoxName(boxID)).do();
-    
+    const result : Array<pkg.Transaction> = await indexerClient.searchForTransactions().txType("appl").applicationID(appID).notePrefix(encodeBoxName(boxID)).do();
+    let names: Array<pkg.Address> = []
+    console.log("QUIIII: " + names.length)
+    for(let i=0; i<result.length;i++){
+        names.push(result[i].from)
+        console.log("PROVA: " + names[i])
+    }
+    return names;
 }
 

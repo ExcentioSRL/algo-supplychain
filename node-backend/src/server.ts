@@ -7,12 +7,13 @@ import * as io from "socket.io";
 
 import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
-import {getBoxesNames,getContentForAllBoxes, getContentForBox} from "./indexer.js";
+import {getBoxesNames,getContentForAllBoxes, getContentForBox, getOwnersHistory} from "./indexer.js";
 import { Box, Stock, walletAddress } from './types.js';
 import { getStocksByOwner, removeRequestedByStocksApproved, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
 import { approveRequest, createRequest, deleteRequest } from './helpers/helper_requests.js';
-import { searchStocksByPartialID } from './helpers/helper_boxes.js';
+import { searchBoxesByPartialID } from './helpers/helper_boxes.js';
+import { getNameFromAddress } from './helpers/helper_users.js';
 
 
 dotenv.config();
@@ -87,7 +88,7 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('wallet_logout', async() => {
         sockets.delete(socket.id)
-    })
+    });
 
     socket.on('stock_creation',async (id: string, callback) => {
         currentBoxes.push(await getContentForBox(id))
@@ -126,7 +127,7 @@ serverSocket.on('connection', (socket) => {
         let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         stocks = await removeRequestedByStocksApproved(stocks,sockets.get(socket.id)!)
         callback(stocks)
-    })
+    });
 
     socket.on('search_stocks', async(data: string,walletAddress: walletAddress,callback) => {
         let stocks: Stock[] = []
@@ -134,8 +135,14 @@ serverSocket.on('connection', (socket) => {
         for(let i=0;i<matches.length;i++){
             stocks.concat(await getStocksByOwner(matches[i]))
         }*/
-        stocks = stocks.concat(await searchStocksByPartialID(data,walletAddress))
+        stocks = stocks.concat(await searchBoxesByPartialID(data,walletAddress))
         stocks = removeRequestsFromStocks(stocks)
         callback(stocks)
-    })
+    });
+
+    socket.on('get_stock_history',async(id:string,callback) => {
+        const addresses = await getOwnersHistory(id)
+        const names: Array<string> = await Promise.all(addresses.map(address => getNameFromAddress(address.toString())))
+        callback(names)
+    });
 });

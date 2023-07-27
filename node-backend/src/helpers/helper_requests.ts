@@ -9,8 +9,6 @@ export async function getRequestsByWallet(wallet: string): Promise<RequestClass[
     const allRequests: RequestClass[] = await RequestModel.find({$or: [{ oldOwner: userPIVA } , { requester: userPIVA }]});
     const othersRequests : RequestClass[] = allRequests.filter(request => { return request.oldOwner === userPIVA })
     const myRequests = allRequests.filter(request => { return request.requester === userPIVA })
-    console.log("othersRequests: " + othersRequests.length)
-    console.log("myRequests: " + myRequests.length)
     return [othersRequests, myRequests];
 }
 
@@ -21,7 +19,6 @@ export async function createRequest(uuid: string,oldOwner: string, requester: pa
             return ;
         }
         const result = await RequestModel.find({ id: uuid });
-        console.log("RESULT: " + result[0])
         if(result[0] !== undefined){
             console.log("The provided requests already exist");
         }else{

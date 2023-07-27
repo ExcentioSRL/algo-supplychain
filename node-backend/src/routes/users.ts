@@ -19,7 +19,6 @@ router.get('/login',async (req: Request,res : Response) => {
         }else{
             const pIVA : partitaIVA = result[0].partitaIVA!
             const nomeAzienda : string = result[0].nomeAzienda!
-            console.log()
             //req.session.userId = email
             return res.status(200).json({pIva: pIVA, nomeAzienda: nomeAzienda});
         }
