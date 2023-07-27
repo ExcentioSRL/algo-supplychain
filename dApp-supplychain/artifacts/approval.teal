@@ -143,12 +143,14 @@ retsub
 deletestock_2:
 proto 1 0
 frame_dig -1
+extract 2 0
 box_len
 store 3
 store 2
 load 3
 assert
 frame_dig -1
+extract 2 0
 box_del
 pop
 retsub

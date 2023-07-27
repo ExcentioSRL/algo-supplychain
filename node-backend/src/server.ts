@@ -81,7 +81,7 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('wallet_login',async (wallet: walletAddress,callback) => {
         sockets.set(socket.id, wallet)
-        let stocks : Stock[] = await getStocksByOwner(wallet)
+        let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
         stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
@@ -151,6 +151,7 @@ serverSocket.on('connection', (socket) => {
     socket.on('get_stock_history',async(id:string,callback) => {
         const addresses = await getOwnersHistory(id)
         const names: Array<string> = await Promise.all(addresses.map(address => getNameFromAddress(address.toString())))
+        console.log("names server : " + JSON.stringify(names))
         callback(names)
     });
 });

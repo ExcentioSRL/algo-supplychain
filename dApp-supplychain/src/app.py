@@ -25,8 +25,8 @@ def add_stock(uuid: abi.String, creator: abi.Address) -> Expr:
 @app.external
 def delete_stock(uuid: abi.String) -> Expr:
     return Seq(
-        Assert(app.state.stocks[uuid].exists()),
-        Pop(app.state.stocks[uuid].delete())
+        Assert(app.state.stocks[uuid.get()].exists()),
+        Pop(app.state.stocks[uuid.get()].delete())
     )
 
 @app.external

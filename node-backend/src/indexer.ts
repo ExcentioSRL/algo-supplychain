@@ -36,7 +36,7 @@ export async function getContentForAllBoxes(boxNames: Uint8Array[]){
     for(let i=0;i<boxNames.length; i++){
         result = await indexerClient.lookupApplicationBoxByIDandName(appID,boxNames[i]).do();
         addresses = decodeBoxData(result.value);
-        boxes.push(new Box(decodeBoxName(result.name),addresses[0],addresses[1]));
+        boxes.push(new Box(decodeBoxName(result.name),addresses[1],addresses[0]));
     }
     return boxes;
 }
@@ -62,7 +62,8 @@ export async function updateBoxesWithChangedBox(id: string){
         console.log("Box not found")
     }else{
         currentBoxes.splice(idx, 1)
-        currentBoxes.push(await getContentForBox(id))
+        const newBox : Box = await getContentForBox(id)
+        currentBoxes.push(newBox)
     }
     
 }
@@ -74,12 +75,10 @@ export async function getOwnersHistory(boxID: string) {
     }
 
     //getting all transactions with this box.id in the notes, since there is no way of searching for boxes in the transaction
-    const result : Array<pkg.Transaction> = await indexerClient.searchForTransactions().txType("appl").applicationID(appID).notePrefix(encodeBoxName(boxID)).do();
+    const result = await indexerClient.searchForTransactions().applicationID(appID).notePrefix(Buffer.from(boxID)).do();
     let names: Array<pkg.Address> = []
-    console.log("QUIIII: " + names.length)
-    for(let i=0; i<result.length;i++){
-        names.push(result[i].from)
-        console.log("PROVA: " + names[i])
+    for(let i=0; i<result.transactions.length;i++){
+        names.push(result.transactions[i].sender)
     }
     return names;
 }
