@@ -27,12 +27,17 @@ export async function getStocksByOwner(ownerWallet: walletAddress): Promise<Stoc
     const filteredBoxes = currentBoxes.filter(box => {
         return box.owner == ownerWallet
     })
-    const allRequests = await getRequestsByWallet(ownerWallet)
 
-    let result = await Promise.all(filteredBoxes.map(box => fromBoxToStock(box, Status.owned))) //my stocks
-    result = result.concat(await filterBoxes(filteredBoxes, allRequests[0], false)) //others requests on my stocks
-    result = result.concat(await filterBoxes(currentBoxes, allRequests[1], true)) //my requests on others stocks
-    return removeDuplicates(result)
+    const allRequests = await getRequestsByWallet(ownerWallet)
+    if(allRequests.length === 0){
+        return []
+    }else{
+        let result = await Promise.all(filteredBoxes.map(box => fromBoxToStock(box, Status.owned))) //my stocks
+        result = result.concat(await filterBoxes(filteredBoxes, allRequests[0], false)) //others requests on my stocks
+        result = result.concat(await filterBoxes(currentBoxes, allRequests[1], true)) //my requests on others stocks
+        return removeDuplicates(result)
+    }
+    
 }
 
 export function removeRequestsFromStocks(stocks: Stock[]) : Stock[]{

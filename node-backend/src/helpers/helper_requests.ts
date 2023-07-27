@@ -5,11 +5,17 @@ import { getPIVAfromAddress, getPIVAfromName } from "./helper_users.js";
 
 export async function getRequestsByWallet(wallet: string): Promise<RequestClass[][]> {
     const userPIVA = await getPIVAfromAddress(wallet);
+    if(userPIVA === ""){
+        return []
+    }else{
+        const allRequests: RequestClass[] = await RequestModel.find({ $or: [{ oldOwner: userPIVA }, { requester: userPIVA }] });
+        const othersRequests: RequestClass[] = allRequests.filter(request => { return request.oldOwner === userPIVA })
+        const myRequests = allRequests.filter(request => { return request.requester === userPIVA })
+        return [othersRequests, myRequests];
+    }
     /*getting all users requests and separating them between his requests on others stocks and others requests on his stocks */
-    const allRequests: RequestClass[] = await RequestModel.find({$or: [{ oldOwner: userPIVA } , { requester: userPIVA }]});
-    const othersRequests : RequestClass[] = allRequests.filter(request => { return request.oldOwner === userPIVA })
-    const myRequests = allRequests.filter(request => { return request.requester === userPIVA })
-    return [othersRequests, myRequests];
+    
+    
 }
 
 export async function createRequest(uuid: string,oldOwner: string, requester: partitaIVA){

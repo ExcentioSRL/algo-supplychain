@@ -13,8 +13,9 @@ export async function getPIVAfromAddress(walletAddress: walletAddress){
     let partitaIVA: partitaIVA = "";
     if (userData[0] === undefined) {
         console.log("No wallet associated with this account")
+    }else{
+        partitaIVA = userData[0].partitaIVA!
     }
-    partitaIVA = userData[0].partitaIVA!
     return partitaIVA
 }
 
