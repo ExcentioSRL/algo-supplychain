@@ -8,7 +8,7 @@ import * as io from "socket.io";
 import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
 import {getBoxesNames,getContentForAllBoxes, getContentForBox, getOwnersHistory} from "./indexer.js";
-import { Box, Stock, walletAddress } from './types.js';
+import { Box, Stock, StockHistory, walletAddress } from './types.js';
 import { getStocksByOwner, removeRequestedByStocksApproved, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { updateBoxesWithChangedBox } from './indexer.js';
 import { approveRequest, createRequest, deleteRequest } from './helpers/helper_requests.js';
@@ -150,8 +150,8 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('get_stock_history',async(id:string,callback) => {
         const addresses = await getOwnersHistory(id)
-        const names: Array<string> = await Promise.all(addresses.map(address => getNameFromAddress(address.toString())))
-        console.log("names server : " + JSON.stringify(names))
-        callback(names)
+        const stringAddresses = addresses.map(address => address.toString());
+        const names: Array<string> = await Promise.all(stringAddresses.map(address => getNameFromAddress(address)))
+        callback(new StockHistory(id,names,stringAddresses))
     });
 });

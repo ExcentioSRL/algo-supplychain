@@ -15,7 +15,7 @@ export async function fromBoxToStock(box: Box,status: Status, request?: RequestC
     if(status === Status.requested_by || status === Status.requested){
         const oldOwner: string = await getNameFromPIVA(request?.oldOwner!);
         const requester: string = await getNameFromPIVA(request?.requester!);
-        return new Stock(box.id, producer, status, owner, new StockRequest(oldOwner, requester,request?.isApproved!))
+        return new Stock(box.id, producer, status, owner, new StockRequest(oldOwner, requester, request?.isApproved!))
     }else{
         return new Stock(box.id, producer, status, owner,undefined)
     }

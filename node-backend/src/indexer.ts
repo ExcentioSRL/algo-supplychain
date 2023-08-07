@@ -1,6 +1,6 @@
 import pkg from 'algosdk';
 import dotenv from 'dotenv';
-import { Box, walletAddress } from './types.js';
+import { Box } from './types.js';
 import { encodeBoxName, decodeBoxData,decodeBoxName } from './helpers/helper_boxes.js';
 import { currentBoxes } from './server.js';
 
