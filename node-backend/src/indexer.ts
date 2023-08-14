@@ -1,12 +1,8 @@
 import pkg from 'algosdk';
 import dotenv from 'dotenv';
 import { Box } from './types.js';
-import { encodeBoxName, decodeBoxData,decodeBoxName } from './helpers/helper_boxes.js';
-import { currentBoxes } from './server.js';
+import { decodeBoxName, encodeBoxName, getDecodedBox } from './helpers/helper_boxes.js';
 
-
-
-const {Indexer} = pkg
 dotenv.config()
 let indexerClient: any;
 let appID = parseInt(process.env.APP_ID!);
@@ -16,60 +12,27 @@ function createIndexerClient(){
 }
 
 /* Done once on start */
-export async function getBoxesNames(){
+export async function getBoxesNames() : Promise<Array<string>>{
     if(indexerClient === undefined){
         indexerClient = createIndexerClient();
     }
 
-    let data = await indexerClient.searchForApplicationBoxes(appID).do();
-    return data.boxes.map((box: { name: any; }) => box.name);
+    let names = await indexerClient.searchForApplicationBoxes(appID).do();
+    return names.boxes.map((box: pkg.indexerModels.BoxDescriptor) => decodeBoxName(box.name));
 }
 
-export async function getContentForAllBoxes(boxNames: Uint8Array[]){
-    if(indexerClient === undefined){
-        indexerClient = createIndexerClient();
-    }
-
-    let result;
-    let boxes : Box[] = [];
-    let addresses;
-    for(let i=0;i<boxNames.length; i++){
-        result = await indexerClient.lookupApplicationBoxByIDandName(appID,boxNames[i]).do();
-        addresses = decodeBoxData(result.value);
-        boxes.push(new Box(decodeBoxName(result.name),addresses[1],addresses[0]));
-    }
-    return boxes;
-}
-
-/* Done multiple times whenever a box is crated / modified */
-export async function getContentForBox(id: string) {
+/* Done multiple times whenever a box is created / modified */
+export async function getBox(id: string) : Promise<Box> {
     if (indexerClient === undefined) {
         indexerClient = createIndexerClient();
     }
     
-    const result = await indexerClient.lookupApplicationBoxByIDandName(appID, encodeBoxName(id)).do();
-    const addresses = decodeBoxData(result.value);
-    return new Box(decodeBoxName(result.name), addresses[1], addresses[0]);
+    const result : pkg.indexerModels.Box = await indexerClient.lookupApplicationBoxByIDandName(appID, encodeBoxName(id)).do();
+    return getDecodedBox(result)
 }
 
-export async function updateBoxesWithChangedBox(id: string){
-    if (indexerClient === undefined) {
-        indexerClient = createIndexerClient();
-    }
-    
-    const idx = currentBoxes.findIndex(box => {return box.id === id})
-    if(idx === -1){
-        console.log("Box not found")
-    }else{
-        currentBoxes.splice(idx, 1)
-        const newBox : Box = await getContentForBox(id)
-        currentBoxes.push(newBox)
-    }
-    
-}
-
-/* Done multiple times whenever a QR-Code is scanned*/
-export async function getOwnersHistory(boxID: string) {
+/* Done multiple times whenever a QR-Code is generated*/
+export async function getOwnersAddressHistory(boxID: string): Promise<Array<pkg.Address>>{
     if(indexerClient === undefined){
         indexerClient = createIndexerClient();
     }

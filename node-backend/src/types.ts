@@ -1,6 +1,8 @@
 export type partitaIVA = string
 export type walletAddress = string
+export type companyName = string
 //created types to remove ambiguity
+
 
 export enum Status {
     owned = "owned",
@@ -11,12 +13,12 @@ export enum Status {
 
 export class Stock{
     id: string;
-    producer: string;
+    producer: companyName;
     status: Status;
-    owner: string;
+    owner: companyName;
     request?: StockRequest;
 
-    constructor(id: string, producer: string, status: Status, owner: string, request?: StockRequest){
+    constructor(id: string, producer: companyName, status: Status, owner: companyName, request?: StockRequest){
         this.id = id
         this.producer = producer
         this.status = status
@@ -25,26 +27,14 @@ export class Stock{
     }
 }
 
-export class StockRequest{
-    oldOwner: string; //nome azienda
-    requester: string; //nome azienda
-    isApproved: boolean;
-
-    constructor(oldOwner: string,requester: string, isApproved: boolean){
-        this.oldOwner = oldOwner;
-        this.requester = requester;
-        this.isApproved = isApproved;
-    }
-}
-
 export class UserData{
-    email?: string | undefined;
-    password?: string | undefined;
-    nomeAzienda?: string | undefined;
-    partitaIVA?: partitaIVA | undefined;
-    walletAddress?: walletAddress | undefined;
+    email: string;
+    password: string;
+    nomeAzienda: companyName;
+    partitaIVA: partitaIVA;
+    walletAddress: walletAddress;
 
-    constructor(email?: string, password?: string, nomeAzienda?: string, partitaIVA?: partitaIVA, walletAddress?: walletAddress){
+    constructor(email: string, password: string, nomeAzienda: companyName, partitaIVA: partitaIVA, walletAddress: walletAddress){
         this.email = email
         this.password = password
         this.nomeAzienda = nomeAzienda
@@ -66,13 +56,14 @@ export class Box{
 
 }
 
-export class RequestClass{
-    id: string;
-    oldOwner: partitaIVA;
+export class StockRequest{
     requester: partitaIVA;
     isApproved: boolean;
 
-    constructor(id: string,oldOwner: string, requester: string,isApproved: boolean){
+    id?: string;
+    oldOwner?: partitaIVA;
+
+    constructor(requester: partitaIVA, isApproved: boolean, id?: string, oldOwner?: partitaIVA){
         this.id = id
         this.oldOwner = oldOwner
         this.requester = requester
@@ -82,10 +73,10 @@ export class RequestClass{
 
 export class StockHistory{
     id: string;
-    historyNames : Array<string>
-    historyWallets: Array<string>
-
-    constructor(id:string,historyNames: Array<string>, historyWallets : Array<string>){
+    historyNames: Array<companyName>
+    historyWallets: Array<walletAddress>
+    
+    constructor(id: string, historyNames: Array<companyName>, historyWallets: Array<walletAddress>){
         this.id = id;
         this.historyNames = historyNames;
         this.historyWallets = historyWallets;

@@ -1,10 +1,10 @@
 import {Status,Stock, walletAddress} from "../types.js"
 import { currentBoxes } from "../server.js";
-import { fromBoxToStock, filterBoxes } from "./helper_boxes.js";
-import { getRequestsByWallet } from "./helper_requests.js";
-import { getNameFromAddress } from "./helper_users.js";
+import { fromBoxToStock, associateBoxesWithRequests } from "./helper_boxes.js";
+import { getCompanyName } from "./helper_users.js";
+import { getRequestsByOldOwner, getRequestsByRequester } from "./helper_requests.js"
 
-export function removeDuplicates(array: Stock[]) {
+function removeDuplicates(array: Stock[]) : Array<Stock>{
     const set = new Set();
     let risultato: Stock[] = [];
     risultato = array.filter(stock => {
@@ -23,40 +23,38 @@ export function removeDuplicates(array: Stock[]) {
     return risultato;
 }
 
-export async function getStocksByOwner(ownerWallet: walletAddress): Promise<Stock[]> {
+export async function getStocksByOwner(ownerWallet: walletAddress): Promise<Array<Stock>> {
     const filteredBoxes = currentBoxes.filter(box => {
         return box.owner == ownerWallet
     })
 
-    const allRequests = await getRequestsByWallet(ownerWallet)
-    if(allRequests.length === 0){
-        return []
-    }else{
-        let result = await Promise.all(filteredBoxes.map(box => fromBoxToStock(box, Status.owned))) //my stocks
-        result = result.concat(await filterBoxes(filteredBoxes, allRequests[0], false)) //others requests on my stocks
-        result = result.concat(await filterBoxes(currentBoxes, allRequests[1], true)) //my requests on others stocks
-        return removeDuplicates(result)
-    }
-    
+    let result = await Promise.all(filteredBoxes.map(box => fromBoxToStock(box, Status.owned)))
+    result = result.concat(await associateBoxesWithRequests(filteredBoxes, await getRequestsByOldOwner(ownerWallet), Status.requested_by)) 
+    result = result.concat(await associateBoxesWithRequests(currentBoxes, await getRequestsByRequester(ownerWallet), Status.requested)) 
+    result = removeDuplicates(result)
+    return removeApprovedRequestedByStocks(result,ownerWallet)
 }
 
-export function removeRequestsFromStocks(stocks: Stock[]) : Stock[]{
-    let temporaryStocks: Stock[] = stocks.filter(stock => { return stock.status !== Status.requested })
-    temporaryStocks = temporaryStocks.map(stock => changeRequestedbyToUnavailable(stock))
+export function removeRequestsFromStocks(stocks: Stock[]) : Array<Stock>{
+    const temporaryStocks: Stock[] = stocks.map(stock => changeRequestsToUnavailable(stock))
     return temporaryStocks
 }
 
-export function changeRequestedbyToUnavailable(stock : Stock) : Stock{
-    if(stock.status === Status.requested_by){
+export function changeRequestsToUnavailable(stock : Stock) : Stock{
+    if(stock.status === Status.requested_by || stock.status === Status.requested){
         return new Stock(stock.id,stock.producer,Status.unavailable,stock.owner,undefined)
     }else{
         return stock
     }
 }
-
-export async function removeRequestedByStocksApproved(stocks: Stock[],walletAddress:walletAddress){
-
-    const name = await getNameFromAddress(walletAddress)
+/**
+ * 
+ * @param stocks 
+ * @param walletAddress 
+ * @returns Removes all stocks that got an approved request for a specific user (the user is the old owner)
+ */
+async function removeApprovedRequestedByStocks(stocks: Stock[],walletAddress:walletAddress) : Promise<Array<Stock>>{
+    const name = await getCompanyName(walletAddress)
 
     return stocks.filter(stock => {
         if (stock.status !== Status.requested_by) {

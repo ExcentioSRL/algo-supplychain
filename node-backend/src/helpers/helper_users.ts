@@ -1,36 +1,24 @@
-import { UserData,walletAddress,partitaIVA } from "../types.js"
+import { UserData, companyName, partitaIVA } from "../types.js"
 import { UserModel } from "../database.js";
 
-
-export async function getNameFromAddress(walletAddress: walletAddress){
-    const userData : UserData[] = await UserModel.find({ walletAddress: walletAddress })
-    const owner : string = userData[0].nomeAzienda!
-    return owner
-}
-
-export async function getPIVAfromAddress(walletAddress: walletAddress){
-    const userData: UserData[] = await UserModel.find({ walletAddress: walletAddress })
-    let partitaIVA: partitaIVA = "";
-    if (userData[0] === undefined) {
-        console.log("No wallet associated with this account")
-    }else{
-        partitaIVA = userData[0].partitaIVA!
+async function getUserData(data: string): Promise<UserData>{
+    const userData: UserData | null = await UserModel.findOne({ $or: [{ nomeAzienda: data }, { walletAddress: data }, {partitaIVA: data}] })
+    if(userData === undefined || userData === null){
+        throw new Error("User data is missing");
     }
-    return partitaIVA
+    return userData
 }
 
-export async function getPIVAfromName(name: string){
-    const userData: UserData[] = await UserModel.find({ nomeAzienda: name })
-    const owner: partitaIVA = userData[0].partitaIVA!
-    return owner
+export async function getCompanyName(data: string) : Promise<companyName>{
+    const user : UserData = await getUserData(data)
+    return user.nomeAzienda;
 }
 
-export async function getNameFromPIVA(partitaIVA: partitaIVA){
-    const userData : UserData[] = await UserModel.find({partitaIVA: partitaIVA})
-    const name: string = userData[0].nomeAzienda!
-    return name
+export async function getPIVA(data: string) : Promise<partitaIVA>{
+    const user: UserData = await getUserData(data)
+    return user.partitaIVA;
 }
-
+/*
 export async function searchPIVAorName(data:string) : Promise<walletAddress[]>{
     let matches : Array<walletAddress> =[]
     const regexPattern = new RegExp(data,"i")
@@ -44,4 +32,4 @@ export async function searchPIVAorName(data:string) : Promise<walletAddress[]>{
         }
     }
     return matches
-}
+}*/

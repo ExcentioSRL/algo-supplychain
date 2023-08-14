@@ -1,22 +1,23 @@
 import { RequestModel } from "../database.js";
-import { RequestClass, partitaIVA } from "../types.js";
-import { getPIVAfromAddress, getPIVAfromName } from "./helper_users.js";
+import { StockRequest, companyName, partitaIVA, walletAddress } from "../types.js";
+import { getPIVA } from "./helper_users.js";
 
 
-export async function getRequestsByWallet(wallet: string): Promise<RequestClass[][]> {
-    const userPIVA = await getPIVAfromAddress(wallet);
-    if(userPIVA === ""){
-        return []
-    }else{
-        /*getting all users requests and separating them between his requests on others stocks and others requests on his stocks */
-        const allRequests: RequestClass[] = await RequestModel.find({ $or: [{ oldOwner: userPIVA }, { requester: userPIVA }] });
-        const othersRequests: RequestClass[] = allRequests.filter(request => { return request.oldOwner === userPIVA })
-        const myRequests = allRequests.filter(request => { return request.requester === userPIVA })
-        return [othersRequests, myRequests];
-    }
+export async function getRequestsByOldOwner(oldOwner: walletAddress): Promise<StockRequest[]>{
+    const userPIVA : partitaIVA = await getPIVA(oldOwner)
+    const requests: StockRequest[] = await RequestModel.find({ oldOwner: userPIVA })
+    return requests
 }
 
-export async function createRequest(uuid: string,oldOwner: string, requester: partitaIVA){
+
+export async function getRequestsByRequester(requester: walletAddress): Promise<StockRequest[]>{
+    const userPIVA: partitaIVA = await getPIVA(requester)
+    const requests: StockRequest[] = await RequestModel.find({ requester: userPIVA })
+    return requests
+}
+
+
+export async function createRequest(uuid: string,oldOwner: companyName, requester: partitaIVA): Promise<void>{
     try{
         if (!checkRequest(uuid,oldOwner,requester)){
             console.log("An invalid request was provided");
@@ -26,19 +27,19 @@ export async function createRequest(uuid: string,oldOwner: string, requester: pa
         if(result[0] !== undefined){
             console.log("The provided requests already exist");
         }else{
-            const oldOwnerPIVA: partitaIVA = await getPIVAfromName(oldOwner)
+            const oldOwnerPIVA: partitaIVA = await getPIVA(oldOwner)
             const newRequest = new RequestModel({ id: uuid,oldOwner: oldOwnerPIVA,requester: requester, isApproved: false});
             const response  = await newRequest.save();
             return ;
         }
     }catch(error){
-        console.log("Internal server error");
+        console.log("Create request has generated an error");
     } 
 }
 
-export async function approveRequest(id: string){
+export async function approveRequest(id: string): Promise<void>{
     try{
-        const result : RequestClass[] = await RequestModel.find({id: id});
+        const result: StockRequest[] = await RequestModel.find({id: id});
         if(result[0] === undefined){
             console.log("The provided requests doesn't exist");
         }else{
@@ -49,9 +50,9 @@ export async function approveRequest(id: string){
     }
 }
 
-export async function deleteRequest(id: string){
+export async function deleteRequest(id: string): Promise<void>{
     try{
-        const result : RequestClass[] = await RequestModel.find({id:id})
+        const result: StockRequest[] = await RequestModel.find({id:id})
         if(result[0] === undefined){
             console.log("The provided requests doesn't exist");
         }else{

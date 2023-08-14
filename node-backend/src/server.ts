@@ -7,13 +7,12 @@ import * as io from "socket.io";
 
 import {router as usersRoutes} from './routes/users.js';
 import { connectDB } from './database.js';
-import {getBoxesNames,getContentForAllBoxes, getContentForBox, getOwnersHistory} from "./indexer.js";
+import { getBox, getOwnersAddressHistory } from "./indexer.js";
 import { Box, Stock, StockHistory, walletAddress } from './types.js';
-import { getStocksByOwner, removeRequestedByStocksApproved, removeRequestsFromStocks } from './helpers/helper_stocks.js';
-import { updateBoxesWithChangedBox } from './indexer.js';
+import { getStocksByOwner, removeRequestsFromStocks } from './helpers/helper_stocks.js';
 import { approveRequest, createRequest, deleteRequest } from './helpers/helper_requests.js';
-import { removeBox, searchBoxesByPartialID } from './helpers/helper_boxes.js';
-import { getNameFromAddress } from './helpers/helper_users.js';
+import { getAllBoxes, removeBox, searchBoxesByPartialID, updateBox } from './helpers/helper_boxes.js';
+import { getCompanyName } from './helpers/helper_users.js';
 
 
 dotenv.config();
@@ -59,9 +58,7 @@ app.use(express.json());
 app.use('/users', usersRoutes);
 
 
-await getContentForAllBoxes(await getBoxesNames()).then(response => {
-    currentBoxes = response
-});
+currentBoxes = await getAllBoxes()
 
 server.listen(SOCKET_PORT, () => {
     console.log("Server sockets listening on port " + SOCKET_PORT);
@@ -75,14 +72,12 @@ serverSocket.on('connection', (socket) => {
 
     socket.on('get_stocks',async(callback) => {
         let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks);
     });
 
     socket.on('wallet_login',async (wallet: walletAddress,callback) => {
         sockets.set(socket.id, wallet)
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -91,17 +86,15 @@ serverSocket.on('connection', (socket) => {
     });
 
     socket.on('stock_creation',async (id: string, callback) => {
-        currentBoxes.push(await getContentForBox(id))
+        currentBoxes.push(await getBox(id))
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
     socket.on('stock_change_ownership', async (id : string,callback) => {
-        await updateBoxesWithChangedBox(id)
         await deleteRequest(id)
+        currentBoxes.push(await updateBox(id))
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -109,7 +102,6 @@ serverSocket.on('connection', (socket) => {
         removeBox(id)
         await deleteRequest(id)
         let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     })
 
@@ -117,7 +109,6 @@ serverSocket.on('connection', (socket) => {
         await createRequest(id,oldOwner,requester)
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -125,7 +116,6 @@ serverSocket.on('connection', (socket) => {
         await deleteRequest(id)
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         let stocks : Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks, sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -133,7 +123,6 @@ serverSocket.on('connection', (socket) => {
         await approveRequest(id)
         //Se l'altro proprietario è connesso, aggiorna anche la sua lista di Stock
         let stocks: Stock[] = await getStocksByOwner(sockets.get(socket.id)!)
-        stocks = await removeRequestedByStocksApproved(stocks,sockets.get(socket.id)!)
         callback(stocks)
     });
 
@@ -149,9 +138,9 @@ serverSocket.on('connection', (socket) => {
     });
 
     socket.on('get_stock_history',async(id:string,callback) => {
-        const addresses = await getOwnersHistory(id)
+        const addresses = await getOwnersAddressHistory(id)
         const stringAddresses = addresses.map(address => address.toString());
-        const names: Array<string> = await Promise.all(stringAddresses.map(address => getNameFromAddress(address)))
+        const names: Array<string> = await Promise.all(stringAddresses.map(address => getCompanyName(address)))
         callback(new StockHistory(id,names,stringAddresses))
     });
 });
